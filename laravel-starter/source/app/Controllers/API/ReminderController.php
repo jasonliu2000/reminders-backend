@@ -45,6 +45,10 @@ class ReminderController extends Controller
         return ReminderResource::collection($reminders);
     }
 
+    /**
+     * Delete reminder by ID
+     * 
+     */
     public function delete(Request $request, int $id): Response
     {
         $reminder = Reminder::find($id);
