@@ -6,7 +6,7 @@ use App\Controllers\Controller;
 use App\Models\Reminder;
 use App\Resources\ReminderResource;
 use Illuminate\Contracts\Support\Responsable;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -16,7 +16,7 @@ class ReminderController extends Controller
      * Creates a new reminder & stores it in the database
      * 
      */
-    public function create(Request $request): Responsable
+    public function create(Request $request): Responsable // TODO: consider returning JsonResponse type 
     {
         $user = $request->input('user');
         $text = $request->input('text');
@@ -43,5 +43,16 @@ class ReminderController extends Controller
         Log::info('Reminders data:', ['reminders' => $reminders]);
 
         return ReminderResource::collection($reminders);
+    }
+
+    public function delete(Request $request, int $id): Response
+    {
+        $reminder = Reminder::find($id);
+        if ($reminder === null) {
+            return response()->json(['error' => 'Reminder not found'], 404);
+        }
+
+        $reminder->delete();
+        return response()->noContent();
     }
 }
