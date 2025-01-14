@@ -14,3 +14,4 @@ Route::get('/users/{id}', [UserController::class, 'read']);
 Route::post('/users', [UserController::class, 'create']);
 
 Route::post('/reminders', [ReminderController::class, 'create']);
+Route::get('/reminders/search', [ReminderController::class, 'searchRemindersByKeyword']);
