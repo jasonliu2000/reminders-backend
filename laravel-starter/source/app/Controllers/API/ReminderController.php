@@ -66,7 +66,7 @@ class ReminderController extends Controller
      * Delete reminder by ID
      * 
      */
-    public function delete(Request $request, int $id): Response
+    public function delete(int $id): Response
     {
         $reminder = Reminder::findOrFail($id);
         // if ($reminder === null) {
