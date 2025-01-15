@@ -7,9 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 // use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-// table columns to have: id, created_at, updated_at, text, user
-
-class Reminder extends Model // table name: reminders
+class Reminder extends Model
 {
     // use HasFactory, Notifiable;
 
@@ -21,6 +19,9 @@ class Reminder extends Model // table name: reminders
     protected $fillable = [
         'user',
         'text',
+        'frequency',
+        'custom_interval',
+        'start_date',
     ];
 
     // /**
