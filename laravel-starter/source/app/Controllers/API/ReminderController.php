@@ -99,6 +99,27 @@ class ReminderController extends Controller
 
 
     /**
+     * Patches an existing reminder and then returns the reminder
+     * 
+     */
+    public function patch(Request $request, int $id): Responsable // TODO: consider returning JsonResponse type 
+    {
+        $validatedData = $request->validate([
+            'text' => ['sometimes', 'required', 'string'],
+            'recurrenceType' => ['sometimes', 'required', Rule::enum(ReminderRecurrenceType::class)], // TODO: improve error message if invalid enum
+            'recurrenceValue' => ['required_if:recurrenceType,weekly', 'required_if:recurrenceType,every_n_days', 'integer'], // TODO: consider how to improve weekly // Weekly value: ISO 8601 (1 - Mon, 7 - Sun)
+            'startDate' => ['sometimes', 'required', 'date', 'after_or_equal:today'], // TODO: consider adding date_format instead // FYI: currently only considers UTC timezone
+        ]);
+
+        $reminder = Reminder::findOrFail($id);
+        $reminder->fillWithCamelCase($validatedData);
+        $reminder->save();
+
+        return new ReminderResource($reminder);
+    }
+
+
+    /**
      * Delete reminder by ID
      * 
      */

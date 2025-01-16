@@ -24,6 +24,24 @@ class Reminder extends Model
         'start_date',
     ];
 
+    /**
+     * Custom method to fill model using camel case keys.
+     * 
+     * @param array $attributes
+     * @return $this
+     */
+    public function fillWithCamelCase(array $attributes)
+    {
+        $snakeCaseAttributes = [];
+
+        foreach ($attributes as $key => $value) {
+            $snakeKey = \Illuminate\Support\Str::snake($key);
+            $snakeCaseAttributes[$snakeKey] = $value;
+        }
+
+        return $this->fill($snakeCaseAttributes);
+    }
+
     // /**
     //  * The attributes that should be hidden for serialization.
     //  *
