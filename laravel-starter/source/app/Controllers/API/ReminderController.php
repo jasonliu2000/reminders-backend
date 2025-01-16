@@ -7,13 +7,13 @@ use App\Models\Reminder;
 use App\Resources\ReminderResource;
 use App\Services\ReminderService;
 use App\Enums\ReminderRecurrenceType;
-use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use PDOException;
 use Exception;
 
@@ -135,6 +135,8 @@ class ReminderController extends Controller
                 'message' => $e->getMessage(),
             ], 400);
         }
+
+        // TODO: validate that there aren't other possible exceptions thrown besides the validation
     }
 
 
@@ -142,20 +144,37 @@ class ReminderController extends Controller
      * Patches an existing reminder and then returns the reminder
      * 
      */
-    public function patch(Request $request, int $id): Responsable // TODO: consider returning JsonResponse type 
+    public function patch(Request $request, int $id): JsonResponse
     {
-        $validatedData = $request->validate([
-            'text' => ['sometimes', 'required', 'string'],
-            'recurrenceType' => ['sometimes', 'required', Rule::enum(ReminderRecurrenceType::class)], // TODO: improve error message if invalid enum
-            'recurrenceValue' => ['required_if:recurrenceType,weekly', 'required_if:recurrenceType,every_n_days', 'integer'], // TODO: consider how to improve weekly // Weekly value: ISO 8601 (1 - Mon, 7 - Sun)
-            'startDate' => ['sometimes', 'required', 'date', 'after_or_equal:today'], // TODO: consider adding date_format instead // FYI: currently only considers UTC timezone
-        ]);
+        try {
+            $validatedData = $request->validate([
+                'text' => ['sometimes', 'required', 'string'],
+                'recurrenceType' => ['sometimes', 'required', Rule::enum(ReminderRecurrenceType::class)], // TODO: improve error message if invalid enum
+                'recurrenceValue' => ['required_if:recurrenceType,weekly', 'required_if:recurrenceType,every_n_days', 'integer'], // TODO: consider how to improve weekly // Weekly value: ISO 8601 (1 - Mon, 7 - Sun)
+                'startDate' => ['sometimes', 'required', 'date', 'after_or_equal:today'], // TODO: consider adding date_format instead // FYI: currently only considers UTC timezone
+            ]);
+    
+            $reminder = Reminder::findOrFail($id);
+            $reminder->fillWithCamelCase($validatedData);
+            $reminder->save();
 
-        $reminder = Reminder::findOrFail($id);
-        $reminder->fillWithCamelCase($validatedData);
-        $reminder->save();
+            return response()->json($reminder, 200);
 
-        return new ReminderResource($reminder);
+        } catch (ModelNotFoundException $e) {
+            Log::error('Exception:', [$e->getMessage()]);
+            return response()->json([
+                'status' => '404 Not Found',
+                'message' => 'Reminder not found',
+            ], 404);
+        } catch (ValidationException $e) {
+            Log::error('Exception:', [$e->getMessage()]);
+            return response()->json([
+                'status' => '400 Bad Request',
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+
+        // TODO: should we return generic Exception cases (500 errors) like we do in Create?
     }
 
 
