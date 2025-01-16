@@ -13,6 +13,9 @@ class ReminderService
 	/**
      * Returns reminder(s) in given date range
      * 
+		 * @param string $beginning
+		 * @param string $end
+     * @return array
      */
 	public function getRemindersInDateRange(string $beginning, string $end): array
 	{
@@ -36,6 +39,10 @@ class ReminderService
 	/**
      * Returns whether or not the given reminder will occur in the given date range
      * 
+		 * @param Reminder $reminder
+		 * @param DateTime $beginning
+		 * @param DateTime $end
+		 * @return bool
      */
 	function isReminderInRange(Reminder $reminder, DateTime $beginning, DateTime $end): bool
 	{
@@ -121,6 +128,8 @@ class ReminderService
 	/**
 	 * Returns reminder(s) with a start date before or equal to the given date
 	 * 
+	 * @param string $date
+	 * @return Collection
 	 */
 	function getRemindersStartingBefore(string $date): Collection
     {
@@ -131,6 +140,10 @@ class ReminderService
 	/**
 	 * Returns true if date is within the lower and upper date ranges, otherwise false
 	 * 
+	 * @param DateTime $date
+	 * @param DateTime $lower
+	 * @param DateTime $upper
+	 * @return bool
 	 */
 	function isDateInRange(DateTime $date, DateTime $lower, DateTime $upper): bool
     {
