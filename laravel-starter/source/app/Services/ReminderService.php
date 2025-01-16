@@ -136,14 +136,4 @@ class ReminderService
     {
         return $date->getTimestamp() >= $lower->getTimestamp() && $date->getTimestamp() <= $upper->getTimestamp();
     }
-
-
-	/**
-	 * Returns true if date2 is after date1, otherwise false
-	 * 
-	 */
-	function compareDates(DateTime $date, DateTime $lower, DateTime $upper): bool
-    {
-        return $date->getTimestamp() >= $lower->getTimestamp() && $date->getTimestamp() <= $upper->getTimestamp();
-    }
 }
