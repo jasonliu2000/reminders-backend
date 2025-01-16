@@ -12,6 +12,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
+
+use Illuminate\Validation\ValidationException;
 use Exception;
 
 class ReminderController extends Controller
@@ -28,29 +30,32 @@ class ReminderController extends Controller
      * Creates a new reminder & stores it in the database
      * 
      */
-    public function create(Request $request): Responsable // TODO: consider returning JsonResponse type 
+    public function create(Request $request): JsonResponse
     {
-        $request->validate([
-            'user' => ['required'],
-            'text' => ['required', 'string'],
-            'recurrenceType' => ['required', Rule::enum(ReminderRecurrenceType::class)], // TODO: improve error message if invalid enum
-            'recurrenceValue' => ['nullable', 'required_if:recurrenceType,weekly', 'required_if:recurrenceType,every_n_days', 'integer'], // TODO: consider how to improve weekly // Weekly value: ISO 8601 (1 - Mon, 7 - Sun)
-            'startDate' => ['required', 'date', 'after_or_equal:today'], // TODO: consider adding date_format instead // FYI: currently only considers UTC timezone
-        ]);
+        try {
+            $validatedData = $request->validate([
+                'user' => ['required'],
+                'text' => ['required', 'string'],
+                'recurrenceType' => ['required', Rule::enum(ReminderRecurrenceType::class)], // TODO: improve error message if invalid enum
+                'recurrenceValue' => ['nullable', 'required_if:recurrenceType,weekly', 'required_if:recurrenceType,every_n_days', 'integer'], // TODO: consider how to improve weekly // Weekly value: ISO 8601 (1 - Mon, 7 - Sun)
+                'startDate' => ['required', 'date', 'after_or_equal:today'], // TODO: consider adding date_format instead // FYI: currently only considers UTC timezone
+            ]);
 
-        $user = $request->input('user');
-        $text = $request->input('text');
-        $recurrenceType = $request->input('recurrenceType');
-        $recurrenceValue = $request->input('recurrenceValue');
-        $startDate = $request->input('startDate');
+            return response()->json(Reminder::createWithCamelCase($validatedData), 201);
 
-        return new ReminderResource(Reminder::create([
-            'user' => $user,
-            'text' => $text,
-            'recurrence_type' => $recurrenceType,
-            'recurrence_value' => $recurrenceValue,
-            'start_date' => $startDate,
-        ]));
+        } catch (ValidationException $e) {
+            Log::error('Exception:', [$e->getMessage()]);
+            return response()->json([
+                'status' => '400 Bad Request',
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (Exception $e) {
+            Log::error('Exception:', [$e]);
+            return response()->json([
+                'status' => '500 Internal Server Error',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
 

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 // use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class Reminder extends Model
 {
@@ -25,21 +26,38 @@ class Reminder extends Model
     ];
 
     /**
-     * Custom method to fill model using camel case keys.
+     * Fills model using attributes with camel case keys.
      * 
      * @param array $attributes
      * @return $this
      */
-    public function fillWithCamelCase(array $attributes)
+    public function fillWithCamelCase(array $attributes): Reminder
     {
         $snakeCaseAttributes = [];
-
         foreach ($attributes as $key => $value) {
-            $snakeKey = \Illuminate\Support\Str::snake($key);
+            $snakeKey = Str::snake($key);
             $snakeCaseAttributes[$snakeKey] = $value;
         }
 
         return $this->fill($snakeCaseAttributes);
+    }
+
+
+    /**
+     * Creates new Reminder using attributes with camel case keys.
+     * 
+     * @param array $attributes
+     * @return Reminder $reminder
+     */
+    public static function createWithCamelCase(array $attributes): Reminder
+    {
+        $snakeCaseAttributes = [];
+        foreach ($attributes as $key => $value) {
+            $snakeKey = Str::snake($key);
+            $snakeCaseAttributes[$snakeKey] = $value;
+        }
+
+        return Reminder::create($snakeCaseAttributes);
     }
 
     // /**
