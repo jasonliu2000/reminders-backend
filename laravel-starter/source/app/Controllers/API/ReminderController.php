@@ -8,10 +8,11 @@ use App\Resources\ReminderResource;
 use App\Services\ReminderService;
 use App\Enums\ReminderRecurrenceType;
 use Illuminate\Contracts\Support\Responsable;
-use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 class ReminderController extends Controller
 {
@@ -57,9 +58,18 @@ class ReminderController extends Controller
      * Get reminder by ID
      * 
      */
-    public function getById(int $id): Responsable
+    public function getById(int $id): JsonResponse
     {
-        return new ReminderResource(Reminder::findOrFail($id));
+        try {
+            $reminder = Reminder::findOrFail($id);
+            return response()->json($reminder);
+        } catch (Exception $e) {
+            Log::error('Exception:', [$e->getMessage()]);
+            return response()->json([
+                'status' => '404 Not Found',
+                'message' => 'Reminder not found',
+            ], 404);
+        }
     }
 
 
@@ -123,14 +133,18 @@ class ReminderController extends Controller
      * Delete reminder by ID
      * 
      */
-    public function delete(int $id): Response
+    public function delete(int $id): JsonResponse
     {
-        $reminder = Reminder::findOrFail($id);
-        // if ($reminder === null) {
-        //     return response()->json(['error' => 'Reminder not found'], 404);
-        // }
-
-        $reminder->delete();
-        return response()->noContent();
+        try {
+            $reminder = Reminder::findOrFail($id);
+            $reminder->delete();
+            return response()->json(null, 204);
+        } catch (Exception $e) {
+            Log::error('Exception:', [$e->getMessage()]);
+            return response()->json([
+                'status' => '404 Not Found',
+                'message' => 'Reminder not found',
+            ], 404);
+        }
     }
 }
