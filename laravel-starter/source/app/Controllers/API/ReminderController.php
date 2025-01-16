@@ -115,16 +115,26 @@ class ReminderController extends Controller
      * Returns reminder(s) in given date range
      * 
      */
-    public function getRemindersInDateRange(Request $request): Responsable
+    public function getRemindersInDateRange(Request $request): JsonResponse
     {
-        $request->validate([
-            'startDate' => ['required', 'date', 'after_or_equal:today'], // TODO: consider adding date_format instead // FYI: currently only considers UTC timezone
-            'endDate' => ['required', 'date', 'after_or_equal:startDate'],
-        ]);
+        try {
+            $request->validate([
+                'startDate' => ['required', 'date', 'after_or_equal:today'], // TODO: consider adding date_format instead // FYI: currently only considers UTC timezone
+                'endDate' => ['required', 'date', 'after_or_equal:startDate'],
+            ]);
+    
+            Log::info('Getting reminders for given date range:', [$request->input()]);
+    
+            $remindersInRange = $this->reminderService->getRemindersInDateRange($request->input('startDate'), $request->input('endDate'));
+            return response()->json($remindersInRange, 200);
 
-        $remindersInRange = $this->reminderService->getRemindersInDateRange($request->input('startDate'), $request->input('endDate'));
-        
-        return ReminderResource::collection($remindersInRange);
+        } catch (Exception $e) {
+            Log::error('Exception:', [$e->getMessage()]);
+            return response()->json([
+                'status' => '400 Bad Request',
+                'message' => $e->getMessage(),
+            ], 400);
+        }
     }
 
 
