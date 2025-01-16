@@ -14,6 +14,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 
 use Illuminate\Validation\ValidationException;
+use PDOException;
 use Exception;
 
 class ReminderController extends Controller
@@ -49,11 +50,17 @@ class ReminderController extends Controller
                 'status' => '400 Bad Request',
                 'message' => $e->getMessage(),
             ], 400);
-        } catch (Exception $e) {
-            Log::error('Exception:', [$e]);
+        } catch (PDOException $e) {
+            Log::error('Exception:', [$e->getMessage()]);
             return response()->json([
                 'status' => '500 Internal Server Error',
-                'message' => $e->getMessage(),
+                'message' => 'Failed to add reminder to database.',
+            ], 500);
+        } catch (Exception $e) {
+            Log::error('Exception:', [$e->getMessage()]);
+            return response()->json([
+                'status' => '500 Internal Server Error',
+                'message' => 'Failed to create and store reminder due to internal error.',
             ], 500);
         }
     }
