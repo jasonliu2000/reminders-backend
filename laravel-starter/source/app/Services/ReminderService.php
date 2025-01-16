@@ -13,8 +13,8 @@ class ReminderService
 	/**
      * Returns reminder(s) in given date range
      * 
-		 * @param string $beginning
-		 * @param string $end
+	 * @param string $beginning
+	 * @param string $end
      * @return array
      */
 	public function getRemindersInDateRange(string $beginning, string $end): array
@@ -39,10 +39,10 @@ class ReminderService
 	/**
      * Returns whether or not the given reminder will occur in the given date range
      * 
-		 * @param Reminder $reminder
-		 * @param DateTime $beginning
-		 * @param DateTime $end
-		 * @return bool
+	 * @param Reminder $reminder
+	 * @param DateTime $beginning
+	 * @param DateTime $end
+	 * @return bool
      */
 	function isReminderInRange(Reminder $reminder, DateTime $beginning, DateTime $end): bool
 	{
