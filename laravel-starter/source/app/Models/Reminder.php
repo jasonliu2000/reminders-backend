@@ -47,7 +47,7 @@ class Reminder extends Model
      * Creates new Reminder using attributes with camel case keys.
      * 
      * @param array $attributes
-     * @return Reminder $reminder
+     * @return Reminder
      */
     public static function createWithCamelCase(array $attributes): Reminder
     {
