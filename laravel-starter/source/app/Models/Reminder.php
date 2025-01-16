@@ -19,8 +19,8 @@ class Reminder extends Model
     protected $fillable = [
         'user',
         'text',
-        'frequency',
-        'custom_interval',
+        'recurrence_type',
+        'recurrence_value',
         'start_date',
     ];
 

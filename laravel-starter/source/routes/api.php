@@ -15,4 +15,5 @@ Route::post('/users', [UserController::class, 'create']);
 
 Route::post('/reminders', [ReminderController::class, 'create']);
 Route::get('/reminders/search', [ReminderController::class, 'searchRemindersByKeyword']);
+Route::get('/reminders', [ReminderController::class, 'getRemindersInDateRange']);
 Route::delete('/reminders/{id}', [ReminderController::class, 'delete']);

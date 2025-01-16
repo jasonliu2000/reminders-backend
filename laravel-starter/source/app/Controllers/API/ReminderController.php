@@ -5,7 +5,8 @@ namespace App\Controllers\API;
 use App\Controllers\Controller;
 use App\Models\Reminder;
 use App\Resources\ReminderResource;
-use App\Enums\ReminderFrequency;
+use App\Services\ReminderService;
+use App\Enums\ReminderRecurrenceType;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
@@ -14,6 +15,14 @@ use Illuminate\Support\Facades\Log;
 
 class ReminderController extends Controller
 {
+    private $reminderService;
+
+    public function __construct(ReminderService $reminderService)
+    {
+        $this->reminderService = $reminderService;
+    }
+    
+
     /**
      * Creates a new reminder & stores it in the database
      * 
@@ -23,34 +32,33 @@ class ReminderController extends Controller
         $request->validate([
             'user' => ['required'],
             'text' => ['required', 'string'],
-            'frequency' => ['required', Rule::enum(ReminderFrequency::class)], // TODO: improve error message if invalid enum
-            'customInterval' => ['required_if:frequency,custom', 'integer'],
+            'recurrenceType' => ['required', Rule::enum(ReminderRecurrenceType::class)], // TODO: improve error message if invalid enum
+            'recurrenceValue' => ['required_if:recurrenceType,weekly', 'required_if:recurrenceType,every_n_days', 'integer'], // TODO: consider how to improve weekly // Weekly value: ISO 8601 (1 - Mon, 7 - Sun)
             'startDate' => ['required', 'date', 'after_or_equal:today'], // TODO: consider adding date_format instead // FYI: currently only considers UTC timezone
         ]);
 
         $user = $request->input('user');
         $text = $request->input('text');
-        $frequency = $request->input('frequency');
-        $customInterval = $request->input('customInterval');
+        $recurrenceType = $request->input('recurrenceType');
+        $recurrenceValue = $request->input('recurrenceValue');
         $startDate = $request->input('startDate');
-        
-        // TODO: handle duplicate reminder created
 
         return new ReminderResource(Reminder::create([
             'user' => $user,
             'text' => $text,
-            'frequency' => $frequency,
-            'custom_interval' => $customInterval,
+            'recurrence_type' => $recurrenceType,
+            'recurrence_value' => $recurrenceValue,
             'start_date' => $startDate,
         ]));
     }
 
+
     /**
-     * Gets reminder(s) based on a keyword
+     * Returns reminder(s) based on a keyword
      * 
      */
     public function searchRemindersByKeyword(Request $request): Responsable
-    {   
+    {
         Log::info('all:', [Reminder::all()]);
 
         $keyword = $request->input('keyword');
@@ -61,6 +69,24 @@ class ReminderController extends Controller
 
         return ReminderResource::collection($reminders);
     }
+
+
+    /**
+     * Returns reminder(s) in given date range
+     * 
+     */
+    public function getRemindersInDateRange(Request $request): Responsable
+    {
+        $request->validate([
+            'startDate' => ['required', 'date', 'after_or_equal:today'], // TODO: consider adding date_format instead // FYI: currently only considers UTC timezone
+            'endDate' => ['required', 'date', 'after_or_equal:startDate'],
+        ]);
+
+        $remindersInRange = $this->reminderService->getRemindersInDateRange($request->input('startDate'), $request->input('endDate'));
+        
+        return ReminderResource::collection($remindersInRange);
+    }
+
 
     /**
      * Delete reminder by ID
