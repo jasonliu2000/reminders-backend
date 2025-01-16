@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/users/{id}', [UserController::class, 'read']);
 Route::post('/users', [UserController::class, 'create']);
 
-Route::post('/reminders', [ReminderController::class, 'create']);
-Route::get('/reminders/search', [ReminderController::class, 'searchRemindersByKeyword']);
+Route::get('/reminders/{id}', [ReminderController::class, 'getById']);
+Route::get('/reminders/search', [ReminderController::class, 'searchRemindersByKeyword']); // TODO: change to get prefix?
 Route::get('/reminders', [ReminderController::class, 'getRemindersInDateRange']);
 Route::delete('/reminders/{id}', [ReminderController::class, 'delete']);

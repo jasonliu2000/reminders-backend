@@ -54,6 +54,16 @@ class ReminderController extends Controller
 
 
     /**
+     * Get reminder by ID
+     * 
+     */
+    public function getById(int $id): Responsable
+    {
+        return new ReminderResource(Reminder::findOrFail($id));
+    }
+
+
+    /**
      * Returns reminder(s) based on a keyword
      * 
      */
