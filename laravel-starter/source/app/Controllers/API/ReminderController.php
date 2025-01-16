@@ -33,7 +33,7 @@ class ReminderController extends Controller
             'user' => ['required'],
             'text' => ['required', 'string'],
             'recurrenceType' => ['required', Rule::enum(ReminderRecurrenceType::class)], // TODO: improve error message if invalid enum
-            'recurrenceValue' => ['required_if:recurrenceType,weekly', 'required_if:recurrenceType,every_n_days', 'integer'], // TODO: consider how to improve weekly // Weekly value: ISO 8601 (1 - Mon, 7 - Sun)
+            'recurrenceValue' => ['nullable', 'required_if:recurrenceType,weekly', 'required_if:recurrenceType,every_n_days', 'integer'], // TODO: consider how to improve weekly // Weekly value: ISO 8601 (1 - Mon, 7 - Sun)
             'startDate' => ['required', 'date', 'after_or_equal:today'], // TODO: consider adding date_format instead // FYI: currently only considers UTC timezone
         ]);
 
