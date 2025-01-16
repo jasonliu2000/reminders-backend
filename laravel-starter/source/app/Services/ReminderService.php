@@ -42,8 +42,6 @@ class ReminderService
 		$interval = $beginning->diff($end);
 		$reminderStart = new DateTime($reminder->start_date);
 
-		Log::info('reminder:', [$reminder->text]);
-
 		if ($reminderStart->getTimestamp() > $end->getTimestamp()) {
 			return false;
 		}
@@ -73,9 +71,8 @@ class ReminderService
 			case ReminderRecurrenceType::EVERY_N_DAYS->value:
 				$n = $reminder->recurrence_value;
 				$daysDifference = (int) $reminderStart->diff($beginning)->format('%a');
-				Log::info('daysDifference:', [$daysDifference]);
-
-				if ($daysDifference === 0 || $n - $daysDifference <= $interval->d) {
+				$daysUntilFirstReminder = $daysDifference % $n !== 0 ? $n - ($daysDifference % $n) : 0;
+				if ($daysUntilFirstReminder <= $interval->d) {
 					return true;
 				}
 				break;
@@ -85,10 +82,13 @@ class ReminderService
 				// Log::info('reminderDayOfMonth:', [$reminderDayOfMonth]);
 				$beginningDayOfMonth = (int) $beginning->format('j'); // TODO: change var name, it's confusing
 				// Log::info('beginningDayOfMonth:', [$beginningDayOfMonth]);
-				$differentMonthOrYr = ($beginning->format('n') !== $end->format('n') || $beginning->format('Y') !== $end->format('Y'));
+				$differentYr = $beginning->format('Y') !== $end->format('Y');
+				$differentMonth = $beginning->format('n') !== $end->format('n');
 				// Log::info('diffMonth:', [$beginning->format('n') !== $end->format('n')]);
 
-				if ($differentMonthOrYr) {
+				if ($differentYr && $beginning->format('n') !== '12' && $beginning->format('n') !== '1') {
+					return true;
+				} elseif ($differentMonth) {
 					$daysInFirstMonth = (int) $beginning->format('t');
 					$daysUntilNextMonth = $daysInFirstMonth - $beginningDayOfMonth;
 					if ($reminderDayOfMonth >= $beginningDayOfMonth || $interval->d - $daysUntilNextMonth >= $reminderDayOfMonth) {
@@ -136,4 +136,5 @@ class ReminderService
     {
         return $date->getTimestamp() >= $lower->getTimestamp() && $date->getTimestamp() <= $upper->getTimestamp();
     }
+
 }
