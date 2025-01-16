@@ -89,17 +89,14 @@ class ReminderController extends Controller
      * Returns reminder(s) based on a keyword
      * 
      */
-    public function searchRemindersByKeyword(Request $request): Responsable
+    public function searchRemindersByKeyword(Request $request): JsonResponse
     {
-        Log::info('all:', [Reminder::all()]);
+        $keyword = $request->query('keyword');
+        $keyword = e($keyword);
+        Log::info('Getting reminders matching keyword:', [$keyword]);
 
-        $keyword = $request->input('keyword');
-        Log::info('keyword:', [$keyword]);
-
-        $reminders = Reminder::where('text', 'like', "%$keyword%")->get();
-        Log::info('Reminders data:', ['reminders' => $reminders]);
-
-        return ReminderResource::collection($reminders);
+        $reminders = Reminder::where('text', 'like', '%' . $keyword . '%')->get();
+        return response()->json($reminders, 200);
     }
 
 
