@@ -38,7 +38,7 @@ class ReminderController extends Controller
                 'text' => ['required', 'string'],
                 'recurrenceType' => ['required', Rule::enum(ReminderRecurrenceType::class)],
                 'recurrenceValue' => ['nullable', 'required_if:recurrenceType,custom', 'integer'],
-                'startDate' => ['required', 'date', 'after_or_equal:today'], // TODO: consider adding date_format instead // FYI: currently only considers UTC timezone
+                'startDate' => ['required', $this->getDateFormat(), 'after_or_equal:today'],
             ]);
 
             return response()->json(Reminder::createWithCamelCase($validatedData), 201);
@@ -80,6 +80,7 @@ class ReminderController extends Controller
         try {
             $reminder = Reminder::findOrFail($id);
             return response()->json($reminder);
+
         } catch (Exception $e) {
             Log::error('Error: ' . $e->getMessage());
             return response()->json([
@@ -102,10 +103,11 @@ class ReminderController extends Controller
             ]);
             
             $keyword = e($request->query('keyword'));
-            Log::info('Getting reminders matching keyword:', [$keyword]);
+            Log::info('Getting reminders matching keyword: ' . $keyword);
     
             $reminders = Reminder::where('text', 'like', '%' . $keyword . '%')->get();
             return response()->json($reminders, 200);
+
         } catch (Exception $e) {
             Log::error('Error: ' . $e->getMessage());
             return response()->json([
@@ -124,8 +126,8 @@ class ReminderController extends Controller
     {
         try {
             $request->validate([
-                'startDate' => ['required', 'date', 'after_or_equal:today'], // TODO: consider adding date_format instead // FYI: currently only considers UTC timezone
-                'endDate' => ['required', 'date', 'after_or_equal:startDate'],
+                'startDate' => ['required', $this->getDateFormat(), 'after_or_equal:today'],
+                'endDate' => ['required', $this->getDateFormat(), 'after_or_equal:startDate'],
             ]);
     
             Log::info('Getting reminders for given date range:', [$request->input()]);
@@ -164,7 +166,7 @@ class ReminderController extends Controller
                 'text' => ['sometimes', 'required', 'string'],
                 'recurrenceType' => ['sometimes', 'required', Rule::enum(ReminderRecurrenceType::class)],
                 'recurrenceValue' => ['required_if:recurrenceType,weekly', 'required_if:recurrenceType,every_n_days', 'integer'], // TODO: consider how to improve weekly // Weekly value: ISO 8601 (1 - Mon, 7 - Sun)
-                'startDate' => ['sometimes', 'required', 'date', 'after_or_equal:today'], // TODO: consider adding date_format instead // FYI: currently only considers UTC timezone
+                'startDate' => ['sometimes', 'required', $this->getDateFormat(), 'after_or_equal:today'],
             ]);
     
             $reminder = Reminder::findOrFail($id);
@@ -211,6 +213,7 @@ class ReminderController extends Controller
             $reminder = Reminder::findOrFail($id);
             $reminder->delete();
             return response()->json(null, 204);
+
         } catch (Exception $e) {
             Log::error('Error: ' . $e->getMessage());
             return response()->json([
@@ -219,4 +222,17 @@ class ReminderController extends Controller
             ], 404);
         }
     }
+
+
+    /**
+     * Get date format string that should be used to validate all date inputs
+     * 
+     */
+    function getDateFormat(): string
+    {
+        // Assumption is that client will send datetime in UTC timezone
+        // Update function if we want stricter checks to ensure that date is in UTC timezone
+        return 'date_format:Y-m-d\TH:i:s';
+    }
+
 }
