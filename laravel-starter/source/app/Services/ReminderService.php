@@ -14,8 +14,8 @@ class ReminderService
 	/**
      * Returns reminder(s) in given date range
      * 
-	 * @param string $start
-	 * @param string $end
+	 * @param string $start - the start of the date range as a date string
+	 * @param string $end - the end of the date range as a date string
      * @return array
 	 * @throws Exception
      */
@@ -45,9 +45,9 @@ class ReminderService
 	/**
      * Returns whether or not the given reminder will occur in the given date range
      * 
-	 * @param Reminder $reminder
-	 * @param DateTime $lo
-	 * @param DateTime $hi
+	 * @param Reminder $reminder - the Reminder object
+	 * @param DateTime $lo - the lower bound of the date range
+	 * @param DateTime $hi - the upper bound of the date range
 	 * @return bool
      */
 	function isReminderInRange(Reminder $reminder, DateTime $lo, DateTime $hi): bool
@@ -67,9 +67,7 @@ class ReminderService
 			return true;
 		}
 
-		$interval = $lo->diff($hi);
-		
-		// TODO: Need to handle case where reminder is on the 31th, 30th, 29th of a month
+		$daysInRange = $lo->diff($hi)->days;
 
 		switch ($reminder->recurrence_type) {
 			case ReminderRecurrenceType::NONE->value:
@@ -79,56 +77,100 @@ class ReminderService
 				return true;
 
 			case ReminderRecurrenceType::WEEKLY->value:
-				$day = $reminder->recurrence_value;
-				$loDay = (int) $lo->format('N');
-				$daysUntilNextReminder = ($day - $loDay + 7) % 7;
-
-				if ($daysUntilNextReminder <= $interval->days) {
-					return true;
-				}
-				break;
+				return $this->isWeekdayInRange(
+					$reminder->recurrence_value, 
+					$lo,
+					$daysInRange
+				);
 
 			case ReminderRecurrenceType::EVERY_N_DAYS->value:
-				$n = $reminder->recurrence_value;
-				$diff = $firstReminder->diff($lo)->days;
-				$daysUntilNextReminder = $diff % $n === 0 ? 0 : $n - ($diff % $n);
-
-				if ($daysUntilNextReminder <= $interval->days) {
-					return true;
-				}
-				break;
+				return $this->isNthDayInRange(
+					$reminder->recurrence_value, 
+					$firstReminder,
+					$lo,
+					$daysInRange
+				);
 				
 			case ReminderRecurrenceType::MONTHLY->value:
-				$dayOfMonth = (int) $firstReminder->format('j');
-				// Log::info('reminderDayOfMonth:', [$reminderDayOfMonth]);
-				$loDayOfMonth = (int) $lo->format('j');
-				// Log::info('beginningDayOfMonth:', [$beginningDayOfMonth]);
-				$rangeSpansMultipleYears = $lo->format('Y') !== $hi->format('Y');
-				$rangeSpansMultipleMonths = $lo->format('n') !== $hi->format('n');
-				// Log::info('diffMonth:', [$beginning->format('n') !== $end->format('n')]);
-
-				if ($rangeSpansMultipleYears && ($lo->format('n') !== '12' || $hi->format('n') !== '1')) {
-					return true;
-				}
-				
-				if ($rangeSpansMultipleMonths) {
-					$daysInFirstMonth = (int) $lo->format('t');
-					$daysUntilNextMonth = $daysInFirstMonth - $loDayOfMonth;
-					if ($dayOfMonth >= $loDayOfMonth || $interval->days - $daysUntilNextMonth >= $dayOfMonth) {
-						return true;
-					}
-				} else {
-					$hiDayOfMonth = (int) $hi->format('j');
-					if ($dayOfMonth >= $loDayOfMonth && $dayOfMonth <= $hiDayOfMonth) {
-						return true;
-					}
-				}
-
-				break;
+				return $this->isDayInRange(
+					$firstReminder->format('j'),
+					$lo,
+					$hi
+				);
 
 			default:
 				Log::error('The recurrence type for the reminder was not recognized.');
 				break;
+		}
+
+		return false;
+	}
+
+
+	/**
+	 * Returns true if the given weekday will occur in the given date range, otherwise false
+	 * 
+	 * @param int $weekDay - the weekday to check for (1 - Mon, 7 - Sun)
+	 * @param DateTime $loDate - the lower bound of the date range
+	 * @param int $daysInRange - the number of days in the date range
+	 * @return bool
+	 */
+	function isWeekdayInRange(int $weekDay, DateTime $loDate, int $daysInRange): bool
+	{
+		$loDay = (int) $loDate->format('N');
+		$offset = ($weekDay - $loDay + 7) % 7;
+		return $offset <= $daysInRange;
+	}
+
+
+	/**
+	 * Returns true if an occurence of every n days from start will occur in the given date range, otherwise false
+	 * 
+	 * @param int $n - the cycle of every n days
+	 * @param DateTime $start - the starting date of the reminder
+	 * @param DateTime $loDate - the lower bound of the date range
+	 * @param int $daysInRange - the number of days in the date range
+	 * @return bool
+	 */
+	function isNthDayInRange(int $n, DateTime $start, DateTime $loDate, int $daysInRange): bool
+	{
+		$diff = $start->diff($loDate)->days;
+		$offset = ($diff % $n === 0) ? 0 : $n - ($diff % $n);
+		return $offset <= $daysInRange;
+	}
+
+
+	/**
+	 * Returns true if the day of the month is in the given date range, otherwise false
+	 * 
+	 * @param int $day - the day of the month
+	 * @param DateTime $lo - the lower bound of the date range
+	 * @param DateTime $hi - the upper bound of the date range
+	 * @return bool
+	 */
+	// TODO: Need to handle case where reminder is on the 31th, 30th, 29th of a month
+	function isDayInRange(int $day, DateTime $lo, DateTime $hi): bool
+	{
+		$loDayOfMonth = (int) $lo->format('j');
+		$rangeSpansMultipleYears = $lo->format('Y') !== $hi->format('Y');
+		$rangeSpansMultipleMonths = $lo->format('n') !== $hi->format('n');
+
+		if ($rangeSpansMultipleYears && ($lo->format('n') !== '12' || $hi->format('n') !== '1')) {
+			return true;
+		}
+		
+		if ($rangeSpansMultipleMonths) {
+			$daysInFirstMonth = (int) $lo->format('t');
+			$daysUntilNextMonth = $daysInFirstMonth - $loDayOfMonth;
+			$daysInRange = $lo->diff($hi)->days;
+			if ($day >= $loDayOfMonth || $daysInRange - $daysUntilNextMonth >= $day) {
+				return true;
+			}
+		} else {
+			$hiDayOfMonth = (int) $hi->format('j');
+			if ($day >= $loDayOfMonth && $day <= $hiDayOfMonth) {
+				return true;
+			}
 		}
 
 		return false;
