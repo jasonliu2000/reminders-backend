@@ -14,15 +14,15 @@ class ReminderService
 	/**
      * Returns reminder(s) in given date range
      * 
-	 * @param string $beginning
+	 * @param string $start
 	 * @param string $end
      * @return array
 	 * @throws Exception
      */
-	public function getRemindersInDateRange(string $beginning, string $end): array
+	public function getRemindersInDateRange(string $start, string $end): array
 	{
 		try {
-			$startDate = new DateTime($beginning);
+			$startDate = new DateTime($start);
 			$endDate = new DateTime($end);
 		} catch (Exception $e) {
 			throw new Exception('Error creating DateTime object: ' . $e->getMessage());
@@ -46,28 +46,28 @@ class ReminderService
      * Returns whether or not the given reminder will occur in the given date range
      * 
 	 * @param Reminder $reminder
-	 * @param DateTime $beginning
-	 * @param DateTime $end
+	 * @param DateTime $lo
+	 * @param DateTime $hi
 	 * @return bool
      */
-	function isReminderInRange(Reminder $reminder, DateTime $beginning, DateTime $end): bool
+	function isReminderInRange(Reminder $reminder, DateTime $lo, DateTime $hi): bool
 	{
 		try {
-			$reminderStart = new DateTime('$reminder->start_date');
+			$firstReminder = new DateTime('$reminder->start_date');
 		} catch (Exception $e) {
 			$msg = "Error creating DateTime object for the start date of reminder with id $reminder->id: ";
 			Log::error($msg . $e->getMessage());
 			return false;
 		}
 
-		if ($reminderStart > $end) {
+		if ($firstReminder > $hi) {
 			return false;
 		}
-		if ($reminderStart >= $beginning && $reminderStart <= $end) {
+		if ($firstReminder >= $lo && $firstReminder <= $hi) {
 			return true;
 		}
 
-		$interval = $beginning->diff($end);
+		$interval = $lo->diff($hi);
 		
 		// TODO: Need to handle case where reminder is on the 31th, 30th, 29th of a month
 
@@ -79,48 +79,47 @@ class ReminderService
 				return true;
 
 			case ReminderRecurrenceType::WEEKLY->value:
-				$reminderDay = $reminder->recurrence_value;
-				$beginningDay = (int) date('N', $beginning->getTimestamp());
-				// var_dump($reminderDay);
-				// var_dump($beginningDay);
-				// var_dump($interval);
-				$daysUntilFirstReminder = ($reminderDay - $beginningDay + 7) % 7;
+				$day = $reminder->recurrence_value;
+				$loDay = (int) $lo->format('N');
+				$daysUntilNextReminder = ($day - $loDay + 7) % 7;
 
-				if ($daysUntilFirstReminder <= $interval->d) {
+				if ($daysUntilNextReminder <= $interval->days) {
 					return true;
 				}
 				break;
 
 			case ReminderRecurrenceType::EVERY_N_DAYS->value:
 				$n = $reminder->recurrence_value;
-				$daysDifference = (int) $reminderStart->diff($beginning)->format('%a');
-				$daysUntilFirstReminder = $daysDifference % $n !== 0 ? $n - ($daysDifference % $n) : 0;
-				if ($daysUntilFirstReminder <= $interval->d) {
+				$diff = $firstReminder->diff($lo)->days;
+				$daysUntilNextReminder = $diff % $n === 0 ? 0 : $n - ($diff % $n);
+
+				if ($daysUntilNextReminder <= $interval->days) {
 					return true;
 				}
 				break;
 				
 			case ReminderRecurrenceType::MONTHLY->value:
-				$reminderDayOfMonth = (int) $reminderStart->format('j');
+				$dayOfMonth = (int) $firstReminder->format('j');
 				// Log::info('reminderDayOfMonth:', [$reminderDayOfMonth]);
-				$beginningDayOfMonth = (int) $beginning->format('j'); // TODO: change var name, it's confusing
+				$loDayOfMonth = (int) $lo->format('j');
 				// Log::info('beginningDayOfMonth:', [$beginningDayOfMonth]);
-				$differentYr = $beginning->format('Y') !== $end->format('Y');
-				$differentMonth = $beginning->format('n') !== $end->format('n');
+				$rangeSpansMultipleYears = $lo->format('Y') !== $hi->format('Y');
+				$rangeSpansMultipleMonths = $lo->format('n') !== $hi->format('n');
 				// Log::info('diffMonth:', [$beginning->format('n') !== $end->format('n')]);
 
-				if ($differentYr && $beginning->format('n') !== '12' && $beginning->format('n') !== '1') {
+				if ($rangeSpansMultipleYears && ($lo->format('n') !== '12' || $hi->format('n') !== '1')) {
 					return true;
-				} elseif ($differentMonth) {
-					$daysInFirstMonth = (int) $beginning->format('t');
-					$daysUntilNextMonth = $daysInFirstMonth - $beginningDayOfMonth;
-					if ($reminderDayOfMonth >= $beginningDayOfMonth || $interval->d - $daysUntilNextMonth >= $reminderDayOfMonth) {
+				}
+				
+				if ($rangeSpansMultipleMonths) {
+					$daysInFirstMonth = (int) $lo->format('t');
+					$daysUntilNextMonth = $daysInFirstMonth - $loDayOfMonth;
+					if ($dayOfMonth >= $loDayOfMonth || $interval->days - $daysUntilNextMonth >= $dayOfMonth) {
 						return true;
 					}
 				} else {
-					$endDayOfMonth = (int) $end->format('j');
-					// this will include the end date of the date range...
-					if ($reminderDayOfMonth >= $beginningDayOfMonth && $reminderDayOfMonth <= $endDayOfMonth) {
+					$hiDayOfMonth = (int) $hi->format('j');
+					if ($dayOfMonth >= $loDayOfMonth && $dayOfMonth <= $hiDayOfMonth) {
 						return true;
 					}
 				}
