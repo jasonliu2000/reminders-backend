@@ -83,7 +83,7 @@ class ReminderService
 					$daysInRange
 				);
 
-			case ReminderRecurrenceType::EVERY_N_DAYS->value:
+			case ReminderRecurrenceType::CUSTOM->value:
 				return $this->isNthDayInRange(
 					$reminder->recurrence_value, 
 					$firstReminder,

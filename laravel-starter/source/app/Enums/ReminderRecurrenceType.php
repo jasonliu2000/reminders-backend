@@ -7,6 +7,6 @@ enum ReminderRecurrenceType: string
     case DAILY = 'daily';
     case WEEKLY = 'weekly';
     case MONTHLY = 'monthly';
-    case EVERY_N_DAYS = 'every_n_days';
+    case CUSTOM = 'custom';
     case NONE = 'none';
 }
