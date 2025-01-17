@@ -46,26 +46,17 @@ class ReminderController extends Controller
         
         catch (ValidationException $e) {
             Log::error('Error: ' . $e->getMessage());
-            return response()->json([
-                'status' => '400 Bad Request',
-                'message' => $e->getMessage(),
-            ], 400);
+            return $this->errorResponse(400, $e->getMessage());
         }
         
         catch (PDOException $e) {
             Log::error('Error: ' . $e->getMessage());
-            return response()->json([
-                'status' => '500 Internal Server Error',
-                'message' => 'Failed to add reminder to database.',
-            ], 500);
+            return $this->errorResponse(500, 'Failed to add reminder to database.');
         }
         
         catch (Exception $e) {
             Log::error('Error: ' . $e->getMessage());
-            return response()->json([
-                'status' => '500 Internal Server Error',
-                'message' => 'Failed to create and store reminder due to an internal error.',
-            ], 500);
+            return $this->errorResponse(500, 'Failed to create and store reminder due to an internal error.');
         }
 
     }
@@ -83,10 +74,7 @@ class ReminderController extends Controller
 
         } catch (Exception $e) {
             Log::error('Error: ' . $e->getMessage());
-            return response()->json([
-                'status' => '404 Not Found',
-                'message' => 'Reminder not found.',
-            ], 404);
+            return $this->errorResponse(404, 'Reminder not found');
         }
     }
 
@@ -110,10 +98,7 @@ class ReminderController extends Controller
 
         } catch (Exception $e) {
             Log::error('Error: ' . $e->getMessage());
-            return response()->json([
-                'status' => '400 Bad Request',
-                'message' => $e->getMessage(),
-            ], 400);
+            return $this->errorResponse(400, $e->getMessage());
         }
     }
 
@@ -138,18 +123,12 @@ class ReminderController extends Controller
         
         catch (ValidationException $e) {
             Log::error('Error: ' . $e->getMessage());
-            return response()->json([
-                'status' => '400 Bad Request',
-                'message' => $e->getMessage(),
-            ], 400);
+            return $this->errorResponse(400, $e->getMessage());
         }
         
         catch (Exception $e) {
-            Log::error($e->getMessage());
-            return response()->json([
-                'status' => '500 Internal Server Error',
-                'message' => 'Failed to retrieve reminders due to an internal error.',
-            ], 500);
+            Log::error('Error: ' . $e->getMessage());
+            return $this->errorResponse(500, 'Failed to retrieve reminders due to an internal error.');
         }
 
     }
@@ -178,26 +157,17 @@ class ReminderController extends Controller
         
         catch (ModelNotFoundException $e) {
             Log::error('Error: ' . $e->getMessage());
-            return response()->json([
-                'status' => '404 Not Found',
-                'message' => 'Reminder not found.',
-            ], 404);
+            return $this->errorResponse(404, 'Reminder not found');
         } 
         
         catch (ValidationException $e) {
             Log::error('Error: ' . $e->getMessage());
-            return response()->json([
-                'status' => '400 Bad Request',
-                'message' => $e->getMessage(),
-            ], 400);
+            return $this->errorResponse(400, $e->getMessage());
         } 
         
         catch (Exception $e) {
             Log::error('Error: ' . $e->getMessage());
-            return response()->json([
-                'status' => '500 Internal Server Error',
-                'message' => 'Failed to patch reminder due to an internal error.',
-            ], 500);
+            return $this->errorResponse(500, 'Failed to patch reminder due to an internal error.');
         }
 
     }
@@ -215,11 +185,8 @@ class ReminderController extends Controller
             return response()->json(null, 204);
 
         } catch (Exception $e) {
-            Log::error('Error: ' . $e->getMessage());
-            return response()->json([
-                'status' => '404 Not Found',
-                'message' => 'Reminder not found',
-            ], 404);
+            
+            return $this->errorResponse(404, 'Reminder not found');
         }
     }
 
@@ -233,6 +200,27 @@ class ReminderController extends Controller
         // Assumption is that client will send datetime in UTC timezone
         // Update function if we want stricter checks to ensure that date is in UTC timezone
         return 'date_format:Y-m-d\TH:i:s';
+    }
+
+
+    /**
+     * Returns custom error response
+     * 
+     */
+    function errorResponse(int $status, string $message): JsonResponse
+    {
+        $statusMessages = [
+            400 => '400 Bad Request',
+            404 => '404 Not Found',
+            500 => '500 Internal Server Error',
+        ];
+
+        $statusMessage = $statusMessages[$status] ?? $status . ' Error';
+
+        return response()->json([
+            'status' => $statusMessage,
+            'message' => $message,
+        ], $status);
     }
 
 }
