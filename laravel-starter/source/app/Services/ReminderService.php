@@ -7,6 +7,7 @@ use App\Enums\ReminderRecurrenceType;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use DateTime;
+use Exception;
 
 class ReminderService
 {
@@ -16,13 +17,18 @@ class ReminderService
 	 * @param string $beginning
 	 * @param string $end
      * @return array
+	 * @throws Exception
      */
 	public function getRemindersInDateRange(string $beginning, string $end): array
 	{
-		$eligibleReminders = $this->getRemindersStartingBefore($end);
-		$startDate = new DateTime($beginning);
-        $endDate = new DateTime($end);
+		try {
+			$startDate = new DateTime($beginning);
+			$endDate = new DateTime($end);
+		} catch (Exception $e) {
+			throw new Exception('Error creating DateTime object: ' . $e->getMessage());
+		}
 
+		$eligibleReminders = $this->getRemindersStartingBefore($end);
 		$results = [];
 
 		foreach ($eligibleReminders as $reminder) {
@@ -46,19 +52,29 @@ class ReminderService
      */
 	function isReminderInRange(Reminder $reminder, DateTime $beginning, DateTime $end): bool
 	{
-		$interval = $beginning->diff($end);
-		$reminderStart = new DateTime($reminder->start_date);
-
-		if ($reminderStart->getTimestamp() > $end->getTimestamp()) {
+		try {
+			$reminderStart = new DateTime('$reminder->start_date');
+		} catch (Exception $e) {
+			$msg = "Error creating DateTime object for the start date of reminder with id $reminder->id: ";
+			Log::error($msg . $e->getMessage());
 			return false;
 		}
-		if ($this->isDateInRange($reminderStart, $beginning, $end)) {
+
+		if ($reminderStart > $end) {
+			return false;
+		}
+		if ($reminderStart >= $beginning && $reminderStart <= $end) {
 			return true;
 		}
+
+		$interval = $beginning->diff($end);
 		
 		// TODO: Need to handle case where reminder is on the 31th, 30th, 29th of a month
 
 		switch ($reminder->recurrence_type) {
+			case ReminderRecurrenceType::NONE->value:
+				return false;
+
 			case ReminderRecurrenceType::DAILY->value:
 				return true;
 
@@ -110,14 +126,9 @@ class ReminderService
 				}
 
 				break;
-			
-			case ReminderRecurrenceType::NONE->value:
-				// skip, should be handled prior to the switch statement
-				// TODO: throw custom exception if we get here?
-				break;
 
 			default:
-				// TODO: Handle case where recurrence type is not recognized
+				Log::error('The recurrence type for the reminder was not recognized.');
 				break;
 		}
 
@@ -134,20 +145,6 @@ class ReminderService
 	function getRemindersStartingBefore(string $date): Collection
     {
         return Reminder::where('start_date', '<=', $date)->get();
-    }
-
-
-	/**
-	 * Returns true if date is within the lower and upper date ranges, otherwise false
-	 * 
-	 * @param DateTime $date
-	 * @param DateTime $lower
-	 * @param DateTime $upper
-	 * @return bool
-	 */
-	function isDateInRange(DateTime $date, DateTime $lower, DateTime $upper): bool
-    {
-        return $date->getTimestamp() >= $lower->getTimestamp() && $date->getTimestamp() <= $upper->getTimestamp();
     }
 
 }
