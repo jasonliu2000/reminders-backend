@@ -85,7 +85,7 @@ class ReminderController extends Controller
             Log::error('Error: ' . $e->getMessage());
             return response()->json([
                 'status' => '404 Not Found',
-                'message' => 'Reminder not found',
+                'message' => 'Reminder not found.',
             ], 404);
         }
     }
@@ -179,7 +179,7 @@ class ReminderController extends Controller
             Log::error('Error: ' . $e->getMessage());
             return response()->json([
                 'status' => '404 Not Found',
-                'message' => 'Reminder not found',
+                'message' => 'Reminder not found.',
             ], 404);
         } 
         
