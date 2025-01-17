@@ -100,7 +100,6 @@ class ReminderService
 
 			default:
 				Log::error('The recurrence type for the reminder was not recognized.');
-				break;
 		}
 
 		return false;
@@ -119,7 +118,7 @@ class ReminderService
 	{
 		$loDay = (int) $loDate->format('N');
 		$offset = ($weekDay - $loDay + 7) % 7;
-		return $offset < $daysInRange;
+		return $offset <= $daysInRange;
 	}
 
 
@@ -136,7 +135,7 @@ class ReminderService
 	{
 		$diff = $start->diff($loDate)->days;
 		$offset = ($diff % $n === 0) ? 0 : $n - ($diff % $n);
-		return $offset < $daysInRange;
+		return $offset <= $daysInRange;
 	}
 
 
@@ -148,31 +147,20 @@ class ReminderService
 	 * @param DateTime $hi - the upper bound of the date range
 	 * @return bool
 	 */
-	// TODO: Need to handle case where reminder is on the 31th, 30th, 29th of a month
 	function isDayInRange(int $day, DateTime $lo, DateTime $hi): bool
 	{
 		$loDayOfMonth = (int) $lo->format('j');
-		$rangeSpansMultipleYears = $lo->format('Y') !== $hi->format('Y');
-		$rangeSpansMultipleMonths = $lo->format('n') !== $hi->format('n');
+		$hiDayOfMonth = (int) $hi->format('j');
 
-		if ($rangeSpansMultipleYears && ($lo->format('n') !== '12' || $hi->format('n') !== '1')) {
-			return true;
-		}
-		
-		if ($rangeSpansMultipleMonths) {
-			$daysInFirstMonth = (int) $lo->format('t');
-			$daysUntilNextMonth = $daysInFirstMonth - $loDayOfMonth;
-			if ($day >= $loDayOfMonth || $this->getDaysInDateRange($lo, $hi) - $daysUntilNextMonth > $day) {
-				return true;
-			}
-		} else {
-			$hiDayOfMonth = (int) $hi->format('j');
-			if ($day >= $loDayOfMonth && $day <= $hiDayOfMonth) {
-				return true;
-			}
+		if ($this->isRangeInSameMonthAndYr($lo, $hi)) {
+			$day = min($day, $this->getDaysOfMonth($lo));
+			return $day >= $loDayOfMonth && $day <= $hiDayOfMonth;
 		}
 
-		return false;
+		$month = $lo->format('m') % 12 + 1;
+		$year = $lo->format('Y') + ($month === 1 ? 1 : 0);
+		$nextReminderDate = new DateTime($year . '-' . $month . '-' . $day); // https://www.php.net/manual/en/datetime.formats.php
+		return $day >= $loDayOfMonth || $nextReminderDate <= $hi;
 	}
 
 
@@ -189,7 +177,7 @@ class ReminderService
 
 
 	/**
-	 * Returns number of days in the given date range
+	 * Returns the number of days in the given date range
 	 * 
 	 * @param DateTime $start
 	 * @param DateTime $end
@@ -197,7 +185,33 @@ class ReminderService
 	 */
 	function getDaysInDateRange(DateTime $start, DateTime $end): int
 	{
-		return $start->diff($end)->days + 1;
+		return $start->diff($end)->days;
+	}
+
+
+	/**
+	 * Returns the number of days in the month that the datetime is in
+	 * 
+	 * @param DateTime $start
+	 * @return int
+	 */
+	function getDaysOfMonth(DateTime $dt): int
+	{
+		return cal_days_in_month(CAL_GREGORIAN, $dt->format('m'), $dt->format('Y'));
+	}
+
+
+	/**
+	 * Returns true if the given date range is contained in the same month and year, otherwise false
+	 * 
+	 * 
+	 * @param DateTime $lo
+	 * @param DateTime $hi
+	 * @return bool
+	 */
+	function isRangeInSameMonthAndYr(DateTime $lo, DateTime $hi): bool
+	{
+		return $lo->format('Y') === $hi->format('Y') && $lo->format('n') === $hi->format('n');
 	}
 
 }

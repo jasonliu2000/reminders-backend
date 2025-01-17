@@ -99,60 +99,99 @@ class ReminderServiceTest extends TestCase
         $result = $this->service->isWeekdayInRange(5, new DateTime('2025-02-07') /*Fri*/, 2);
         $this->assertSame($result, true, 'A Fri reminder should return TRUE for a date range that starts on a Fri.');
 
-        $result = $this->service->isWeekdayInRange(5, new DateTime('2025-02-06') /*Thur*/, 2);
+        $result = $this->service->isWeekdayInRange(5, new DateTime('2025-02-06') /*Thur*/, 1);
         $this->assertSame($result, true, 'A Fri reminder should return TRUE for a date range that ends on a Fri.');
 
-        $result = $this->service->isWeekdayInRange(5, new DateTime('2025-02-08') /*Sat*/, 6);
+        $result = $this->service->isWeekdayInRange(5, new DateTime('2025-02-08') /*Sat*/, 5);
         $this->assertSame($result, false, 'A Fri reminder should return FALSE for a date range that doesn\'t contain Fri.');
     }
 
-
     public function testIsNthDayInRange()
     {
-        $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-16'), 3);
+        $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-16'), 2);
         $this->assertSame($result, false, 'The reminder reoccurs on 1/19, so it should return FALSE for 1/16-1/18.');
 
-        $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-20'), 2);
+        $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-20'), 1);
         $this->assertSame($result, false, 'The reminder reoccurs on 1/19, so it should return FALSE for 1/20-1/21.');
 
         $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-19'), 2);
         $this->assertSame($result, true, 'The reminder reoccurs on the same date as the starting date of the range, so this should return TRUE.');
 
-        $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-20'), 4);
+        $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-20'), 3);
         $this->assertSame($result, true, 'The reminder reoccurs on the same date as the ending date of the range, so this should return TRUE.');
 
         $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-25'), 5);
-        $this->assertSame($result, true, 'The reminder reoccurs on 1/27, so it should return TRUE for 1/25-1/29.');
+        $this->assertSame($result, true, 'The reminder reoccurs on 1/27, so it should return TRUE for 1/25-1/30.');
     }
 
 
     public function testIsDayInRange()
     {
-        // TODO: Need to handle case where reminder is on the 31th, 30th, 29th of a month
-
         $result = $this->service->isDayInRange(25, new DateTime('2025-03-20'), new DateTime('2025-04-02'));
-        $this->assertSame($result, true, 'The reminder reoccurs on 3/25, so it should return TRUE for 3/20-4/2.');
+        $this->assertSame($result, true, 'The reminder occurs on 3/25, so it should return TRUE for 3/20-4/2.');
 
         $result = $this->service->isDayInRange(25, new DateTime('2025-03-25'), new DateTime('2025-04-02'));
-        $this->assertSame($result, true, 'The reminder reoccurs on 3/25, so it should return TRUE for 3/25-4/2.');
+        $this->assertSame($result, true, 'The reminder occurs on 3/25, so it should return TRUE for 3/25-4/2.');
 
         $result = $this->service->isDayInRange(25, new DateTime('2025-02-26'), new DateTime('2025-03-25'));
-        $this->assertSame($result, true, 'The reminder reoccurs on 3/25, so it should return TRUE for 2/26-3/25.');
+        $this->assertSame($result, true, 'The reminder occurs on 3/25, so it should return TRUE for 2/26-3/25.');
 
         $result = $this->service->isDayInRange(25, new DateTime('2025-03-20'), new DateTime('2025-03-30'));
-        $this->assertSame($result, true, 'The reminder reoccurs on 3/25, so it should return TRUE for 3/20-3/30.');
+        $this->assertSame($result, true, 'The reminder occurs on 3/25, so it should return TRUE for 3/20-3/30.');
+
+        $result = $this->service->isDayInRange(25, new DateTime('2025-03-20'), new DateTime('2026-03-30'));
+        $this->assertSame($result, true, 'The reminder occurs on 3/25, so it should return TRUE for 3/20/25-3/30/26.');
 
         $result = $this->service->isDayInRange(25, new DateTime('2025-02-26'), new DateTime('2025-03-24'));
-        $this->assertSame($result, false, 'The reminder reoccurs on 3/25, so it should return FALSE for 2/26-3/24.');
+        $this->assertSame($result, false, 'The reminder occurs on 3/25, so it should return FALSE for 2/26-3/24.');
+
+        $result = $this->service->isDayInRange(25, new DateTime('2025-03-26'), new DateTime('2025-04-24'));
+        $this->assertSame($result, false, 'The reminder occurs on the 25th of every month, so it should return FALSE for 3/26-4/24.');
 
         $result = $this->service->isDayInRange(25, new DateTime('2025-03-26'), new DateTime('2026-02-24'));
-        $this->assertSame($result, true, 'The reminder reoccurs on the 25th of every month, so it should return TRUE here.');
+        $this->assertSame($result, true, 'The reminder occurs on the 25th of every month, so it should return TRUE here.');
 
         $result = $this->service->isDayInRange(25, new DateTime('2025-12-26'), new DateTime('2026-01-24'));
-        $this->assertSame($result, false, 'The reminder reoccurs on 12/25, so it should return FALSE for 12/26-1/24.');
+        $this->assertSame($result, false, 'The reminder occurs on 12/25, so it should return FALSE for 12/26-1/24.');
 
         $result = $this->service->isDayInRange(25, new DateTime('2025-12-24'), new DateTime('2026-01-24'));
-        $this->assertSame($result, true, 'The reminder reoccurs on 12/25, so it should return TRUE for 12/24-1/24.');
+        $this->assertSame($result, true, 'The reminder occurs on 12/25, so it should return TRUE for 12/24-1/24.');
+
+        $result = $this->service->isDayInRange(31, new DateTime('2025-02-24'), new DateTime('2025-02-28')); // 28 days in Feb 2025
+        $this->assertSame($result, true, 'If the date range includes months that don\t go up to the day, it should return TRUE as long as the date range includes the last day of the month.');
+
+        $result = $this->service->isDayInRange(29, new DateTime('2025-02-24'), new DateTime('2025-02-28')); // 28 days in Feb 2025
+        $this->assertSame($result, true, 'If the date range includes months that don\t go up to the day, it should return TRUE as long as the date range includes the last day of the month.');
+
+        $result = $this->service->isDayInRange(31, new DateTime('2025-02-24'), new DateTime('2025-02-28')); // 28 days in Feb 2025
+        $this->assertSame($result, true, 'If the date range includes months that don\t go up to the day, it should return TRUE as long as the date range includes the last day of the month.');
+    }
+
+    public function testGetDaysInDateRange() 
+    {
+        $result = $this->service->getDaysInDateRange(new DateTime('2025-01-01'), new DateTime('2025-01-01'));
+        $this->assertSame($result, 0);
+
+        $result = $this->service->getDaysInDateRange(new DateTime('2025-01-01'), new DateTime('2025-01-02'));
+        $this->assertSame($result, 1);
+
+        $result = $this->service->getDaysInDateRange(new DateTime('2025-01-01'), new DateTime('2025-01-31'));
+        $this->assertSame($result, 30);
+    }
+
+    public function testIsRangeInSameMonthAndYr() 
+    {
+        $result = $this->service->isRangeInSameMonthAndYr(new DateTime('2025-01-01'), new DateTime('2025-01-01'));
+        $this->assertSame($result, true);
+
+        $result = $this->service->isRangeInSameMonthAndYr(new DateTime('2025-01-01'), new DateTime('2025-01-31'));
+        $this->assertSame($result, true);
+
+        $result = $this->service->isRangeInSameMonthAndYr(new DateTime('2025-01-31'), new DateTime('2025-02-01'));
+        $this->assertSame($result, false);
+
+        $result = $this->service->isRangeInSameMonthAndYr(new DateTime('2025-01-01'), new DateTime('2026-01-01'));
+        $this->assertSame($result, false);
     }
 
 }
