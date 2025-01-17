@@ -28,7 +28,6 @@ class ReminderController extends Controller
 
     /**
      * Creates a new reminder & stores it in the database
-     * 
      */
     public function create(Request $request): JsonResponse
     {
@@ -42,7 +41,7 @@ class ReminderController extends Controller
             ]);
 
             return response()->json(Reminder::createWithCamelCase($validatedData), 201);
-        } 
+        }
         
         catch (ValidationException $e) {
             Log::error('Error: ' . $e->getMessage());
@@ -64,7 +63,6 @@ class ReminderController extends Controller
 
     /**
      * Get reminder by ID
-     * 
      */
     public function getById(int $id): JsonResponse
     {
@@ -81,7 +79,6 @@ class ReminderController extends Controller
 
     /**
      * Returns reminder(s) based on a keyword
-     * 
      */
     public function getRemindersByKeyword(Request $request): JsonResponse
     {
@@ -105,7 +102,6 @@ class ReminderController extends Controller
 
     /**
      * Returns reminder(s) in given date range
-     * 
      */
     public function getRemindersInDateRange(Request $request): JsonResponse
     {
@@ -136,7 +132,6 @@ class ReminderController extends Controller
 
     /**
      * Patches an existing reminder and then returns the reminder
-     * 
      */
     public function patch(Request $request, int $id): JsonResponse
     {
@@ -175,7 +170,6 @@ class ReminderController extends Controller
 
     /**
      * Delete reminder by ID
-     * 
      */
     public function delete(int $id): JsonResponse
     {
@@ -193,7 +187,6 @@ class ReminderController extends Controller
 
     /**
      * Get date format string that should be used to validate all date inputs
-     * 
      */
     function getDateFormat(): string
     {
@@ -206,6 +199,8 @@ class ReminderController extends Controller
     /**
      * Returns custom error response
      * 
+     * @param int $status - the HTTP status code
+     * @param string $message - the error message
      */
     function errorResponse(int $status, string $message): JsonResponse
     {
