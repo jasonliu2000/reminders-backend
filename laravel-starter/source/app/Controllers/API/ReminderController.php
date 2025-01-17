@@ -95,7 +95,7 @@ class ReminderController extends Controller
      * Returns reminder(s) based on a keyword
      * 
      */
-    public function searchRemindersByKeyword(Request $request): JsonResponse
+    public function getRemindersByKeyword(Request $request): JsonResponse
     {
         try {
             $request->validate([
