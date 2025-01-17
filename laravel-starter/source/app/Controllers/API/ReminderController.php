@@ -4,7 +4,6 @@ namespace App\Controllers\API;
 
 use App\Controllers\Controller;
 use App\Models\Reminder;
-use App\Resources\ReminderResource;
 use App\Services\ReminderService;
 use App\Enums\ReminderRecurrenceType;
 use Illuminate\Http\JsonResponse;
