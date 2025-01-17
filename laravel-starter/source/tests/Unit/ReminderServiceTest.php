@@ -93,34 +93,34 @@ class ReminderServiceTest extends TestCase
 
     public function testIsWeekdayInRange()
     {
-        $result = $this->service->isWeekdayInRange(5, new DateTime('2025-07-01'), 7);
+        $result = $this->service->isWeekdayInRange(5, new DateTime('2025-07-01'), new DateTime('2025-07-08'));
         $this->assertSame($result, true, 'A weekly reminder should return TRUE for a date range that contains all days of the week.');
 
-        $result = $this->service->isWeekdayInRange(5, new DateTime('2025-02-07') /*Fri*/, 2);
+        $result = $this->service->isWeekdayInRange(5, new DateTime('2025-02-07') /*Fri*/, new DateTime('2025-02-09'));
         $this->assertSame($result, true, 'A Fri reminder should return TRUE for a date range that starts on a Fri.');
 
-        $result = $this->service->isWeekdayInRange(5, new DateTime('2025-02-06') /*Thur*/, 1);
+        $result = $this->service->isWeekdayInRange(5, new DateTime('2025-02-06'), new DateTime('2025-02-07') /*Fri*/);
         $this->assertSame($result, true, 'A Fri reminder should return TRUE for a date range that ends on a Fri.');
 
-        $result = $this->service->isWeekdayInRange(5, new DateTime('2025-02-08') /*Sat*/, 5);
+        $result = $this->service->isWeekdayInRange(5, new DateTime('2025-02-08') /*Sat*/, new DateTime('2025-02-13') /*Thur*/);
         $this->assertSame($result, false, 'A Fri reminder should return FALSE for a date range that doesn\'t contain Fri.');
     }
 
     public function testIsNthDayInRange()
     {
-        $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-16'), 2);
+        $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-16'), new DateTime('2025-01-18'));
         $this->assertSame($result, false, 'The reminder reoccurs on 1/19, so it should return FALSE for 1/16-1/18.');
 
-        $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-20'), 1);
+        $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-20'), new DateTime('2025-01-21'));
         $this->assertSame($result, false, 'The reminder reoccurs on 1/19, so it should return FALSE for 1/20-1/21.');
 
-        $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-19'), 2);
+        $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-19'), new DateTime('2025-01-21'));
         $this->assertSame($result, true, 'The reminder reoccurs on the same date as the starting date of the range, so this should return TRUE.');
 
-        $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-20'), 3);
+        $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-20'), new DateTime('2025-01-23'));
         $this->assertSame($result, true, 'The reminder reoccurs on the same date as the ending date of the range, so this should return TRUE.');
 
-        $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-25'), 5);
+        $result = $this->service->isNthDayInRange(4, new DateTime('2025-01-15'), new DateTime('2025-01-25'), new DateTime('2025-01-30'));
         $this->assertSame($result, true, 'The reminder reoccurs on 1/27, so it should return TRUE for 1/25-1/30.');
     }
 

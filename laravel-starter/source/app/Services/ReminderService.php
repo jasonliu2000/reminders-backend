@@ -53,21 +53,19 @@ class ReminderService
 	function isReminderInRange(Reminder $reminder, DateTime $lo, DateTime $hi): bool
 	{
 		try {
-			$firstReminder = new DateTime($reminder->start_date);
+			$reminderStartDate = new DateTime($reminder->start_date);
 		} catch (Exception $e) {
 			$msg = "Error creating DateTime object for the start date of reminder with id $reminder->id: ";
 			Log::error($msg . $e->getMessage());
 			return false;
 		}
 
-		if ($firstReminder > $hi) {
+		if ($reminderStartDate > $hi) {
 			return false;
 		}
-		if ($firstReminder >= $lo && $firstReminder <= $hi) {
+		if ($reminderStartDate >= $lo && $reminderStartDate <= $hi) {
 			return true;
 		}
-
-		$daysInRange = $this->getDaysInDateRange($lo, $hi);
 
 		switch ($reminder->recurrence_type) {
 			case ReminderRecurrenceType::NONE->value:
@@ -78,22 +76,22 @@ class ReminderService
 
 			case ReminderRecurrenceType::WEEKLY->value:
 				return $this->isWeekdayInRange(
-					$reminder->recurrence_value, 
+					$reminderStartDate->format('N'), 
 					$lo,
-					$daysInRange
+					$hi
 				);
 
 			case ReminderRecurrenceType::CUSTOM->value:
 				return $this->isNthDayInRange(
 					$reminder->recurrence_value, 
-					$firstReminder,
+					$reminderStartDate,
 					$lo,
-					$daysInRange
+					$hi
 				);
 				
 			case ReminderRecurrenceType::MONTHLY->value:
 				return $this->isDayInRange(
-					$firstReminder->format('j'),
+					$reminderStartDate->format('j'),
 					$lo,
 					$hi
 				);
@@ -110,15 +108,15 @@ class ReminderService
 	 * Returns true if the given weekday will occur in the given date range, otherwise false
 	 * 
 	 * @param int $weekDay - the weekday to check for (1 - Mon, 7 - Sun)
-	 * @param DateTime $loDate - the lower bound of the date range
-	 * @param int $daysInRange - the number of days in the date range
+	 * @param DateTime $lo - the lower bound of the date range
+	 * @param DateTime $lo - the upper bound of the date range
 	 * @return bool
 	 */
-	function isWeekdayInRange(int $weekDay, DateTime $loDate, int $daysInRange): bool
+	function isWeekdayInRange(int $weekDay, DateTime $lo, DateTime $hi): bool
 	{
-		$loDay = (int) $loDate->format('N');
+		$loDay = $lo->format('N');
 		$offset = ($weekDay - $loDay + 7) % 7;
-		return $offset <= $daysInRange;
+		return $offset <= $this->getDaysInDateRange($lo, $hi);
 	}
 
 
@@ -127,15 +125,15 @@ class ReminderService
 	 * 
 	 * @param int $n - the cycle of every n days
 	 * @param DateTime $start - the starting date of the reminder
-	 * @param DateTime $loDate - the lower bound of the date range
-	 * @param int $daysInRange - the number of days in the date range
+	 * @param DateTime $lo - the lower bound of the date range
+	 * @param DateTime $hi - the upper bound of the date range
 	 * @return bool
 	 */
-	function isNthDayInRange(int $n, DateTime $start, DateTime $loDate, int $daysInRange): bool
+	function isNthDayInRange(int $n, DateTime $start, DateTime $lo, DateTime $hi): bool
 	{
-		$diff = $start->diff($loDate)->days;
+		$diff = $start->diff($lo)->days;
 		$offset = ($diff % $n === 0) ? 0 : $n - ($diff % $n);
-		return $offset <= $daysInRange;
+		return $offset <= $this->getDaysInDateRange($lo, $hi);
 	}
 
 
