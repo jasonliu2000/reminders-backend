@@ -53,7 +53,7 @@ class ReminderService
 	function isReminderInRange(Reminder $reminder, DateTime $lo, DateTime $hi): bool
 	{
 		try {
-			$firstReminder = new DateTime('$reminder->start_date');
+			$firstReminder = new DateTime($reminder->start_date);
 		} catch (Exception $e) {
 			$msg = "Error creating DateTime object for the start date of reminder with id $reminder->id: ";
 			Log::error($msg . $e->getMessage());
