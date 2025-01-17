@@ -28,7 +28,7 @@ class ReminderService
 			throw new Exception('Error creating DateTime object: ' . $e->getMessage());
 		}
 
-		$eligibleReminders = $this->getRemindersStartingBefore($end);
+		$eligibleReminders = $this->getRemindersStartingBeforeDate($end);
 		$results = [];
 
 		foreach ($eligibleReminders as $reminder) {
@@ -141,7 +141,7 @@ class ReminderService
 	 * @param string $date
 	 * @return Collection
 	 */
-	function getRemindersStartingBefore(string $date): Collection
+	function getRemindersStartingBeforeDate(string $date): Collection
     {
         return Reminder::where('start_date', '<=', $date)->get();
     }
