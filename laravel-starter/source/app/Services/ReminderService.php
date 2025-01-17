@@ -67,7 +67,7 @@ class ReminderService
 			return true;
 		}
 
-		$daysInRange = $lo->diff($hi)->days;
+		$daysInRange = $this->getDaysInDateRange($lo, $hi);
 
 		switch ($reminder->recurrence_type) {
 			case ReminderRecurrenceType::NONE->value:
@@ -119,7 +119,7 @@ class ReminderService
 	{
 		$loDay = (int) $loDate->format('N');
 		$offset = ($weekDay - $loDay + 7) % 7;
-		return $offset <= $daysInRange;
+		return $offset < $daysInRange;
 	}
 
 
@@ -136,7 +136,7 @@ class ReminderService
 	{
 		$diff = $start->diff($loDate)->days;
 		$offset = ($diff % $n === 0) ? 0 : $n - ($diff % $n);
-		return $offset <= $daysInRange;
+		return $offset < $daysInRange;
 	}
 
 
@@ -162,8 +162,7 @@ class ReminderService
 		if ($rangeSpansMultipleMonths) {
 			$daysInFirstMonth = (int) $lo->format('t');
 			$daysUntilNextMonth = $daysInFirstMonth - $loDayOfMonth;
-			$daysInRange = $lo->diff($hi)->days;
-			if ($day >= $loDayOfMonth || $daysInRange - $daysUntilNextMonth >= $day) {
+			if ($day >= $loDayOfMonth || $this->getDaysInDateRange($lo, $hi) - $daysUntilNextMonth > $day) {
 				return true;
 			}
 		} else {
@@ -187,5 +186,18 @@ class ReminderService
     {
         return Reminder::where('start_date', '<=', $date)->get();
     }
+
+
+	/**
+	 * Returns number of days in the given date range
+	 * 
+	 * @param DateTime $start
+	 * @param DateTime $end
+	 * @return int
+	 */
+	function getDaysInDateRange(DateTime $start, DateTime $end): int
+	{
+		return $start->diff($end)->days + 1;
+	}
 
 }
