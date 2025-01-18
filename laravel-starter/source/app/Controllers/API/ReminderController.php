@@ -4,6 +4,7 @@ namespace App\Controllers\API;
 
 use App\Controllers\Controller;
 use App\Models\Reminder;
+use App\Resources\ReminderResource;
 use App\Services\ReminderService;
 use App\Enums\ReminderRecurrenceType;
 use Illuminate\Http\JsonResponse;
@@ -40,7 +41,7 @@ class ReminderController extends Controller
                 'startDate' => ['required', $this->getDateFormat(), 'after_or_equal:today'],
             ]);
 
-            return response()->json(Reminder::createWithCamelCase($validatedData), 201);
+            return (new ReminderResource(Reminder::transformAndCreate($validatedData)))->toResponse(request());
         }
         
         catch (ValidationException $e) {
@@ -68,7 +69,7 @@ class ReminderController extends Controller
     {
         try {
             $reminder = Reminder::findOrFail($id);
-            return response()->json($reminder);
+            return (new ReminderResource($reminder))->toResponse(request());
 
         } catch (Exception $e) {
             Log::error('Error: ' . $e->getMessage());
@@ -91,7 +92,7 @@ class ReminderController extends Controller
             Log::info('Getting reminders matching keyword: ' . $keyword);
     
             $reminders = Reminder::where('text', 'like', '%' . $keyword . '%')->get();
-            return response()->json($reminders, 200);
+            return (ReminderResource::collection($reminders))->toResponse(request());
 
         } catch (Exception $e) {
             Log::error('Error: ' . $e->getMessage());
@@ -114,7 +115,7 @@ class ReminderController extends Controller
             Log::info('Getting reminders for given date range:', [$request->input()]);
     
             $remindersInRange = $this->reminderService->getRemindersInDateRange($request->input('startDate'), $request->input('endDate'));
-            return response()->json($remindersInRange, 200);
+            return (ReminderResource::collection($remindersInRange))->toResponse(request());
         }
         
         catch (ValidationException $e) {
@@ -147,7 +148,7 @@ class ReminderController extends Controller
             $reminder->fillWithCamelCase($validatedData);
             $reminder->save();
 
-            return response()->json($reminder, 200);
+            return (new ReminderResource($reminder))->toResponse(request());
         } 
         
         catch (ModelNotFoundException $e) {
@@ -179,7 +180,6 @@ class ReminderController extends Controller
             return response()->json(null, 204);
 
         } catch (Exception $e) {
-            
             return $this->errorResponse(404, 'Reminder not found');
         }
     }
