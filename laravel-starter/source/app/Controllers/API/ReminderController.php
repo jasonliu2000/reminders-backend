@@ -139,7 +139,7 @@ class ReminderController extends Controller
             $validatedData = $request->validate([
                 'text' => ['sometimes', 'required', 'string'],
                 'recurrenceType' => ['sometimes', 'required', Rule::enum(ReminderRecurrenceType::class)],
-                'recurrenceValue' => ['required_if:recurrenceType,weekly', 'required_if:recurrenceType,every_n_days', 'integer'], // TODO: consider how to improve weekly // Weekly value: ISO 8601 (1 - Mon, 7 - Sun)
+                'recurrenceValue' => ['required_if:recurrenceType,custom', 'integer'],
                 'startDate' => ['sometimes', 'required', $this->getDateFormat(), 'after_or_equal:today'],
             ]);
     
