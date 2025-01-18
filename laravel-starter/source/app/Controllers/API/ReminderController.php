@@ -190,8 +190,7 @@ class ReminderController extends Controller
      */
     function getDateFormat(): string
     {
-        // This will enforce API requests to comply with UTC time zone in ISO 8601 format, omitting the '-' & ':' characters
-        return "date_format:Ymd\THis\Z";
+        return 'date_format:' . DateTimeService::getDateFormat();
     }
 
 
