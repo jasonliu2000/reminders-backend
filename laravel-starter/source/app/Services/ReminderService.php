@@ -60,9 +60,6 @@ class ReminderService
 			return false;
 		}
 
-		if ($reminderStartDate > $hi) {
-			return false;
-		}
 		if ($reminderStartDate >= $lo && $reminderStartDate <= $hi) {
 			return true;
 		}
