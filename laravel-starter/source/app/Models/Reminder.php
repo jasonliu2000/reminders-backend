@@ -34,7 +34,7 @@ class Reminder extends Model
     public static function transformAndCreate(array $attributes): Reminder
     {
         $attributes['startDate'] = DateTimeService::transformIntoRFC3339($attributes['startDate']);
-        return Reminder::createWithCamelCase($attributes);
+        return self::createWithCamelCase($attributes);
     }
 
 
@@ -52,7 +52,7 @@ class Reminder extends Model
             $snakeCaseAttributes[$snakeKey] = $value;
         }
 
-        return Reminder::create($snakeCaseAttributes);
+        return self::create($snakeCaseAttributes);
     }
 
 
