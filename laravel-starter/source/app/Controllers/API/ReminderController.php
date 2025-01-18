@@ -190,9 +190,8 @@ class ReminderController extends Controller
      */
     function getDateFormat(): string
     {
-        // Assumption is that client will send datetime in UTC timezone
-        // Update function if we want stricter checks to ensure that date is in UTC timezone
-        return 'date_format:Y-m-d\TH:i:s';
+        // This will enforce API requests to comply with UTC time zone in ISO 8601 format, omitting the '-' & ':' characters
+        return "date_format:Ymd\THis\Z";
     }
 
 
