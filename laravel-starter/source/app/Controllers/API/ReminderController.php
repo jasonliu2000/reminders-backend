@@ -6,6 +6,7 @@ use App\Controllers\Controller;
 use App\Models\Reminder;
 use App\Resources\ReminderResource;
 use App\Services\ReminderService;
+use App\Services\DateTimeService;
 use App\Enums\ReminderRecurrenceType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -145,7 +146,7 @@ class ReminderController extends Controller
             ]);
     
             $reminder = Reminder::findOrFail($id);
-            $reminder->fillWithCamelCase($validatedData);
+            $reminder->transformAndFill($validatedData);
             $reminder->save();
 
             return (new ReminderResource($reminder))->toResponse(request());

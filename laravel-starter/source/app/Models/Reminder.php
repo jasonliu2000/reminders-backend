@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\DateTimeService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -23,21 +24,17 @@ class Reminder extends Model
         'start_date',
     ];
 
+
     /**
-     * Fills model using attributes with camel case keys.
+     * Transforms attributes before creating and returning a new Reminder.
      * 
      * @param array $attributes
-     * @return $this
+     * @return Reminder
      */
-    public function fillWithCamelCase(array $attributes): Reminder
+    public static function transformAndCreate(array $attributes): Reminder
     {
-        $snakeCaseAttributes = [];
-        foreach ($attributes as $key => $value) {
-            $snakeKey = Str::snake($key);
-            $snakeCaseAttributes[$snakeKey] = $value;
-        }
-
-        return $this->fill($snakeCaseAttributes);
+        $attributes['startDate'] = DateTimeService::transformIntoRFC3339($attributes['startDate']);
+        return Reminder::createWithCamelCase($attributes);
     }
 
 
@@ -47,7 +44,7 @@ class Reminder extends Model
      * @param array $attributes
      * @return Reminder
      */
-    public static function createWithCamelCase(array $attributes): Reminder
+    static function createWithCamelCase(array $attributes): Reminder
     {
         $snakeCaseAttributes = [];
         foreach ($attributes as $key => $value) {
@@ -56,6 +53,39 @@ class Reminder extends Model
         }
 
         return Reminder::create($snakeCaseAttributes);
+    }
+
+
+    /**
+     * Transforms attributes before filling existing Reminder with patched fields and returning it.
+     * 
+     * @param array $attributes
+     * @return $this
+     */
+    public function transformAndFill(array $attributes): Reminder
+    {
+        if (isset($attributes['startDate'])) {
+            $attributes['startDate'] = DateTimeService::transformIntoRFC3339($attributes['startDate']);
+        }
+        return $this->fillWithCamelCase($attributes);
+    }
+
+
+    /**
+     * Fills existing Reminder using attributes with camel case keys.
+     * 
+     * @param array $attributes
+     * @return $this
+     */
+    function fillWithCamelCase(array $attributes): Reminder
+    {
+        $snakeCaseAttributes = [];
+        foreach ($attributes as $key => $value) {
+            $snakeKey = Str::snake($key);
+            $snakeCaseAttributes[$snakeKey] = $value;
+        }
+
+        return $this->fill($snakeCaseAttributes);
     }
 
 }
