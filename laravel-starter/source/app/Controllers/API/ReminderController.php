@@ -39,7 +39,7 @@ class ReminderController extends Controller
                 'text' => ['required', 'string'],
                 'recurrenceType' => ['required', Rule::enum(ReminderRecurrenceType::class)],
                 'recurrenceValue' => ['nullable', 'required_if:recurrenceType,custom', 'integer'],
-                'startDate' => ['required', $this->getDateFormat(), 'after_or_equal:today'],
+                'startDate' => ['required', $this->getDateFormat(), 'after_or_equal:now'],
             ]);
 
             return (new ReminderResource(Reminder::transformAndCreate($validatedData)))->toResponse(request());
@@ -109,7 +109,7 @@ class ReminderController extends Controller
     {
         try {
             $request->validate([
-                'startDate' => ['required', $this->getDateFormat(), 'after_or_equal:today'],
+                'startDate' => ['required', $this->getDateFormat(), 'after_or_equal:now'],
                 'endDate' => ['required', $this->getDateFormat(), 'after_or_equal:startDate'],
             ]);
     
@@ -142,7 +142,7 @@ class ReminderController extends Controller
                 'text' => ['sometimes', 'required', 'string'],
                 'recurrenceType' => ['sometimes', 'required', Rule::enum(ReminderRecurrenceType::class)],
                 'recurrenceValue' => ['required_if:recurrenceType,custom', 'integer'],
-                'startDate' => ['sometimes', 'required', $this->getDateFormat(), 'after_or_equal:today'],
+                'startDate' => ['sometimes', 'required', $this->getDateFormat(), 'after_or_equal:now'],
             ]);
     
             $reminder = Reminder::findOrFail($id);
