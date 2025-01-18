@@ -195,7 +195,7 @@ class ReminderService
 	 */
 	function getDaysOfMonth(DateTime $dt): int
 	{
-		return cal_days_in_month(CAL_GREGORIAN, $dt->format('m'), $dt->format('Y'));
+		return date('t', mktime(0, 0, 0, $dt->format('m'), 1, $dt->format('Y')));
 	}
 
 
