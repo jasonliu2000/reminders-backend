@@ -20,14 +20,6 @@ use Exception;
 
 class ReminderController extends Controller
 {
-    private $reminderService;
-
-    public function __construct(ReminderService $reminderService)
-    {
-        $this->reminderService = $reminderService;
-    }
-    
-
     /**
      * Creates a new reminder & stores it in the database
      */
@@ -38,7 +30,7 @@ class ReminderController extends Controller
                 'user' => ['required'],
                 'text' => ['required', 'string'],
                 'recurrenceType' => ['required', Rule::enum(ReminderRecurrenceType::class)],
-                'recurrenceValue' => ['nullable', 'required_if:recurrenceType,custom', 'integer'],
+                'recurrenceValue' => ['nullable', 'required_if:recurrenceType,custom', 'integer', 'min|1'],
                 'startDate' => ['required', $this->getDateFormat(), 'after_or_equal:now'],
             ]);
 
@@ -115,7 +107,7 @@ class ReminderController extends Controller
     
             Log::info('Getting reminders for given date range:', [$request->input()]);
     
-            $remindersInRange = $this->reminderService->getRemindersInDateRange($request->input('startDate'), $request->input('endDate'));
+            $remindersInRange = ReminderService::getRemindersInDateRange($request->input('startDate'), $request->input('endDate'));
             return (ReminderResource::collection($remindersInRange))->toResponse(request());
         }
         
