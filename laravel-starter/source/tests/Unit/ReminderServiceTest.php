@@ -20,18 +20,6 @@ class ReminderServiceTest extends TestCase
 
     public function testIsReminderInRange()
     {
-        // $mockReminder = Mockery::mock('alias:App\Models\Reminder');
-        // $mockReminder->shouldReceive('where')
-        //     ->with('start_date', '<=', '2025-06-01')
-        //     ->once()
-        //     ->andReturnSelf();
-        // $mockReminder->shouldReceive('get')
-        //     ->once()
-        //     ->andReturn(collect([
-        //         (object) ['id' => 1, 'start_date' => '2025-01-10', 'name' => 'Reminder A'],
-        //         (object) ['id' => 2, 'start_date' => '2025-01-12', 'name' => 'Reminder B'],
-        //     ]));
-
         $reminder = new Reminder([
             'user' => 'tester',
             'text' => 'Doctor\'s appointment',
@@ -89,7 +77,10 @@ class ReminderServiceTest extends TestCase
 
     public function testIsTimeInRange()
     {
-        $result = $this->service->isTimeInRange('00:00:00Z', new DateTime('2025-12-31T12:00:00Z'), new DateTime('2025-01-01T12:00:00Z'));
+        $result = $this->service->isTimeInRange('06:00:00Z', new DateTime('2025-12-31T12:00:00Z'), new DateTime('2026-01-01T12:00:00Z'));
+        $this->assertSame($result, true);
+
+        $result = $this->service->isTimeInRange('18:00:00Z', new DateTime('2025-12-31T12:00:00Z'), new DateTime('2026-01-01T12:00:00Z'));
         $this->assertSame($result, true);
 
         $result = $this->service->isTimeInRange('00:00:00Z', new DateTime('2025-01-01T00:00:00Z'), new DateTime('2025-01-01T12:00:00Z'));
@@ -151,6 +142,9 @@ class ReminderServiceTest extends TestCase
         $this->assertSame($result, true, 'The reminder reoccurs on 1/27, so it should return TRUE for 1/25-1/30.');
 
         // time-specific
+        $result = $this->service->isNthDayInRange(3, new DateTime('2025-01-12T12:00:00'), new DateTime('2025-01-12T18:00:00'), new DateTime('2025-01-15'));
+        $this->assertSame($result, false, 'The reminder reoccurs immediately before the start (same day) as well as after the end of the date range (same day), so it should return FALSE.');
+
         $result = $this->service->isNthDayInRange(3, new DateTime('2025-01-12T23:59:59'), new DateTime('2025-01-16'), new DateTime('2025-01-18T23:59:00'));
         $this->assertSame($result, false, 'The reminder reoccurs immediately before the start as well as immediately after the end of the date range, so it should return FALSE.');
 
