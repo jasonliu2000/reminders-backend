@@ -6,7 +6,6 @@ use App\Services\ReminderService;
 use App\Models\Reminder;
 use Tests\TestCase;
 use DateTime;
-use Mockery;
 
 class ReminderServiceTest extends TestCase
 {
