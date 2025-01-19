@@ -30,7 +30,7 @@ class ReminderController extends Controller
                 'user' => ['required'],
                 'text' => ['required', 'string'],
                 'recurrenceType' => ['required', Rule::enum(ReminderRecurrenceType::class)],
-                'recurrenceValue' => ['nullable', 'required_if:recurrenceType,custom', 'integer', 'min|1'],
+                'recurrenceValue' => ['nullable', 'required_if:recurrenceType,custom', 'integer', 'min:1'],
                 'startDate' => ['required', $this->getDateFormat(), 'after_or_equal:now'],
             ]);
 
@@ -133,7 +133,7 @@ class ReminderController extends Controller
             $validatedData = $request->validate([
                 'text' => ['sometimes', 'required', 'string'],
                 'recurrenceType' => ['sometimes', 'required', Rule::enum(ReminderRecurrenceType::class)],
-                'recurrenceValue' => ['required_if:recurrenceType,custom', 'integer'],
+                'recurrenceValue' => ['required_if:recurrenceType,custom', 'integer', 'min:1'],
                 'startDate' => ['sometimes', 'required', $this->getDateFormat(), 'after_or_equal:now'],
             ]);
     
