@@ -22,6 +22,6 @@ class DateTimeService
      */
     public static function transformIntoRFC3339(string $datetime): string
     {
-        return DateTime::createFromFormat(self::getDateFormat(), $datetime)->format(DateTime::RFC3339);
+        return DateTime::createFromFormat(self::getDateFormat(), $datetime)->format('Y-m-d\TH:i:s\Z');
     }
 }
