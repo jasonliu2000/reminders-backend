@@ -172,7 +172,7 @@ class ReminderController extends Controller
             $reminder->delete();
             return response()->json(null, 204);
 
-        } catch (Exception $e) {
+        } catch (Exception) {
             return $this->errorResponse(404, 'Reminder not found');
         }
     }
