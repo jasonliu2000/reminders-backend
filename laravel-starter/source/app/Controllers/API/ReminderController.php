@@ -63,10 +63,15 @@ class ReminderController extends Controller
         try {
             $reminder = Reminder::findOrFail($id);
             return (new ReminderResource($reminder))->toResponse(request());
-
-        } catch (Exception $e) {
-            Log::error('Error: ' . $e->getMessage());
+        } 
+        
+        catch (ModelNotFoundException) {
             return $this->errorResponse(404, 'Reminder not found');
+        }
+
+        catch (Exception $e) {
+            Log::error('Error: ' . $e->getMessage());
+            return $this->errorResponse(500, 'Failed to get reminder due to an internal error.');
         }
     }
 
@@ -86,10 +91,16 @@ class ReminderController extends Controller
     
             $reminders = Reminder::where('text', 'like', '%' . $keyword . '%')->get();
             return (ReminderResource::collection($reminders))->toResponse(request());
-
-        } catch (Exception $e) {
+        } 
+        
+        catch (ValidationException $e) {
             Log::error('Error: ' . $e->getMessage());
             return $this->errorResponse(400, $e->getMessage());
+        }
+
+        catch (Exception $e) {
+            Log::error('Error: ' . $e->getMessage());
+            return $this->errorResponse(500, 'Failed to retrieve reminders due to an internal error.');
         }
     }
 
@@ -144,8 +155,7 @@ class ReminderController extends Controller
             return (new ReminderResource($reminder))->toResponse(request());
         } 
         
-        catch (ModelNotFoundException $e) {
-            Log::error('Error: ' . $e->getMessage());
+        catch (ModelNotFoundException) {
             return $this->errorResponse(404, 'Reminder not found');
         } 
         
@@ -171,9 +181,15 @@ class ReminderController extends Controller
             $reminder = Reminder::findOrFail($id);
             $reminder->delete();
             return response()->json(null, 204);
-
-        } catch (Exception) {
+        } 
+        
+        catch (ModelNotFoundException) {
             return $this->errorResponse(404, 'Reminder not found');
+        }
+
+        catch (Exception $e) {
+            Log::error('Error: ' . $e->getMessage());
+            return $this->errorResponse(500, 'Failed to delete reminder due to an internal error.');
         }
     }
 
