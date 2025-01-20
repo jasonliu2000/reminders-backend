@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ReminderRecurrenceType;
 use App\Services\DateTimeService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,7 +21,7 @@ class Reminder extends Model
         'user',
         'text',
         'recurrence_type',
-        'recurrence_value',
+        'custom_recurrence',
         'start_date',
     ];
 
@@ -67,6 +68,11 @@ class Reminder extends Model
         if (isset($attributes['startDate'])) {
             $attributes['startDate'] = DateTimeService::transformIntoRFC3339($attributes['startDate']);
         }
+
+        if (isset($attributes['recurrenceType']) && $attributes['recurrenceType'] !== ReminderRecurrenceType::CUSTOM->value) {
+            $attributes['customRecurrence'] = null;
+        }
+
         return $this->fillWithCamelCase($attributes);
     }
 

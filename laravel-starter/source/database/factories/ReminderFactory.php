@@ -21,7 +21,7 @@ class ReminderFactory extends Factory
             'user' => $this->faker->name(),
             'text' => $this->faker->sentence(),
             'recurrence_type' => $this->faker->randomElement(['daily', 'weekly', 'monthly']),
-            'recurrence_value' => $this->faker->randomNumber(),
+            'custom_recurrence' => $this->faker->randomNumber(),
             'start_date' => $this->faker->date(),
         ];
     }

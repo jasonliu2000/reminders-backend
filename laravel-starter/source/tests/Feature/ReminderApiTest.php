@@ -21,7 +21,7 @@ class ReminderApiTest extends TestCase
             'user',
             'text',
             'recurrenceType',
-            'recurrenceValue',
+            'customRecurrence',
             'startDate',
             'createdAt',
             'updatedAt',
@@ -314,7 +314,7 @@ class ReminderApiTest extends TestCase
             'user' => 'jason',
             'text' => 'take pill every 3 days',
             'recurrenceType' => 'custom',
-            'recurrenceValue' => 3,
+            'customRecurrence' => 3,
             'startDate' => '20300101T070000Z',
         ];
         
@@ -387,7 +387,7 @@ class ReminderApiTest extends TestCase
         $this->assertStringContainsString('recurrence type is invalid', $message); 
     }
 
-    public function test_create_unsuccessful_missing_recurrence_value()
+    public function test_create_unsuccessful_missing_custom_recurrence()
     {
         $payload = [
             'user' => 'jason',
@@ -402,16 +402,16 @@ class ReminderApiTest extends TestCase
         $response->assertJsonStructure($this->errorResponseStructure);
 
         $message = $response->json()['message']; 
-        $this->assertStringContainsString('recurrence value field is required', $message); 
+        $this->assertStringContainsString('custom recurrence field is required', $message); 
     }
 
-    public function test_create_unsuccessful_invalid_recurrence_value()
+    public function test_create_unsuccessful_invalid_custom_recurrence()
     {
         $payload = [
             'user' => 'jason',
             'text' => 'brush teeth',
             'recurrenceType' => 'custom',
-            'recurrenceValue' => 0,
+            'customRecurrence' => 0,
             'startDate' => '20300101T070000Z',
         ];
         
@@ -421,16 +421,16 @@ class ReminderApiTest extends TestCase
         $response->assertJsonStructure($this->errorResponseStructure);
 
         $message = $response->json()['message']; 
-        $this->assertStringContainsString('recurrence value field must be at least 1', $message); 
+        $this->assertStringContainsString('custom recurrence field must be at least 1', $message); 
     }
 
-    public function test_create_unsuccessful_recurrence_value_noninteger()
+    public function test_create_unsuccessful_custom_recurrence_noninteger()
     {
         $payload = [
             'user' => 'jason',
             'text' => 'brush teeth',
             'recurrenceType' => 'custom',
-            'recurrenceValue' => 'zero',
+            'customRecurrence' => 'zero',
             'startDate' => '20300101T070000Z',
         ];
         
@@ -440,7 +440,7 @@ class ReminderApiTest extends TestCase
         $response->assertJsonStructure($this->errorResponseStructure);
 
         $message = $response->json()['message']; 
-        $this->assertStringContainsString('recurrence value field must be an integer', $message); 
+        $this->assertStringContainsString('custom recurrence field must be an integer', $message); 
     }
 
     public function test_create_unsuccessful_missing_start_date()
@@ -515,7 +515,7 @@ class ReminderApiTest extends TestCase
         $payload = [
             'text' => 'changed text',
             'recurrenceType' => 'custom',
-            'recurrenceValue' => 10,
+            'customRecurrence' => 10,
             'startDate' => '20300101T070000Z',
         ];
         
@@ -593,7 +593,7 @@ class ReminderApiTest extends TestCase
         $this->assertStringContainsString('recurrence type is invalid', $message); 
     }
 
-    public function test_patch_unsuccessful_missing_recurrence_value()
+    public function test_patch_unsuccessful_missing_custom_recurrence()
     {
         $reminder = Reminder::factory()->create();
 
@@ -610,10 +610,10 @@ class ReminderApiTest extends TestCase
         $response->assertJsonStructure($this->errorResponseStructure);
 
         $message = $response->json()['message']; 
-        $this->assertStringContainsString('recurrence value field is required', $message); 
+        $this->assertStringContainsString('custom recurrence field is required', $message); 
     }
 
-    public function test_patch_unsuccessful_invalid_recurrence_value()
+    public function test_patch_unsuccessful_invalid_custom_recurrence()
     {
         $reminder = Reminder::factory()->create();
 
@@ -621,7 +621,7 @@ class ReminderApiTest extends TestCase
             'user' => 'jason',
             'text' => 'brush teeth',
             'recurrenceType' => 'custom',
-            'recurrenceValue' => 0,
+            'customRecurrence' => 0,
             'startDate' => '20300101T070000Z',
         ];
         
@@ -631,10 +631,10 @@ class ReminderApiTest extends TestCase
         $response->assertJsonStructure($this->errorResponseStructure);
 
         $message = $response->json()['message']; 
-        $this->assertStringContainsString('recurrence value field must be at least 1', $message); 
+        $this->assertStringContainsString('custom recurrence field must be at least 1', $message); 
     }
 
-    public function test_patch_unsuccessful_recurrence_value_noninteger()
+    public function test_patch_unsuccessful_custom_recurrence_noninteger()
     {
         $reminder = Reminder::factory()->create();
 
@@ -642,7 +642,7 @@ class ReminderApiTest extends TestCase
             'user' => 'jason',
             'text' => 'brush teeth',
             'recurrenceType' => 'custom',
-            'recurrenceValue' => 'zero',
+            'customRecurrence' => 'zero',
             'startDate' => '20300101T070000Z',
         ];
         
@@ -652,7 +652,7 @@ class ReminderApiTest extends TestCase
         $response->assertJsonStructure($this->errorResponseStructure);
 
         $message = $response->json()['message']; 
-        $this->assertStringContainsString('recurrence value field must be an integer', $message); 
+        $this->assertStringContainsString('custom recurrence field must be an integer', $message); 
     }
 
     public function test_patch_unsuccessful_missing_start_date()

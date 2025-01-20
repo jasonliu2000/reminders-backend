@@ -77,7 +77,7 @@ class ReminderService
 				return self::isWeekdayInRange($reminderStartDate->format('N'), $lo, $hi, $reminderTime);
 
 			case ReminderRecurrenceType::CUSTOM->value:
-				return self::isNthDayInRange($reminder->recurrence_value, $reminderStartDate, $lo, $hi);
+				return self::isNthDayInRange($reminder->custom_recurrence, $reminderStartDate, $lo, $hi);
 				
 			case ReminderRecurrenceType::MONTHLY->value:
 				return self::isDayInRange($reminderStartDate->format('j'), $lo, $hi, $reminderTime);

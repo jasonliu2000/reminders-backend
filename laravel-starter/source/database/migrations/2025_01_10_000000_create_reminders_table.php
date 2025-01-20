@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('user');
             $table->string('text');
             $table->enum('recurrence_type', array_column(ReminderRecurrenceType::cases(), 'value'));
-            $table->integer('recurrence_value')->nullable();
+            $table->integer('custom_recurrence')->nullable();
             $table->date('start_date');
             $table->timestamps();
         });

@@ -14,7 +14,7 @@ class ReminderResource extends JsonResource
             'user' => $this->user,
             'text' => $this->text,
             'recurrenceType' => $this->recurrence_type,
-            'recurrenceValue' => $this->recurrence_value,
+            'customRecurrence' => $this->custom_recurrence,
             'startDate' => $this->start_date,
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at,

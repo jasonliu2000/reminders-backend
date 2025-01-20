@@ -20,7 +20,7 @@ class ReminderServiceTest extends TestCase
             'user' => 'tester',
             'text' => 'Doctor\'s appointment',
             'recurrence_type' => 'none',
-            'recurrence_value' => null,
+            'custom_recurrence' => null,
             'start_date' => '2025-06-01',
         ]);
 
@@ -28,7 +28,7 @@ class ReminderServiceTest extends TestCase
             'user' => 'tester',
             'text' => 'Take medication',
             'recurrence_type' => 'daily',
-            'recurrence_value' => null,
+            'custom_recurrence' => null,
             'start_date' => '2025-02-01',
         ]);
 
@@ -36,7 +36,7 @@ class ReminderServiceTest extends TestCase
             'user' => 'tester',
             'text' => 'Invalid reminder',
             'recurrence_type' => 'INVALID TYPE',
-            'recurrence_value' => null,
+            'custom_recurrence' => null,
             'start_date' => '2025-01-25',
         ]);
 
@@ -44,7 +44,7 @@ class ReminderServiceTest extends TestCase
             'user' => 'tester',
             'text' => 'Invalid reminder',
             'recurrence_type' => 'none',
-            'recurrence_value' => null,
+            'custom_recurrence' => null,
             'start_date' => 'INVALID START',
         ]);
 
