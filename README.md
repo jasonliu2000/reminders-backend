@@ -1,9 +1,25 @@
-# Folia Backend Challenge
+# Reminders
 
-## Getting Started
+A backend reminders app built in PHP/Laravel.
 
-To get started with this project, clone this repository to your machine and check out the assignment prompt. Once you are ready to submit your project, please create a new hosted git repository (GitHub is preferred) containing your submission and send us the link
+### Prerequisites 
+- Docker
 
-## Assignment Prompt
+### Getting started
 
-Once you have completed the above getting started steps, feel free to head to the [assignment](ASSIGNMENT.md) to get started. Best of luck and we look forward to hearing from you soon!
+To build and run the application:
+```
+cd laravel-starter
+make up
+```
+
+To run migrations and seed the database:
+```
+make migrate-fresh
+```
+
+To run unit tests:
+```
+cd laravel-starter/source
+php artisan test
+```
