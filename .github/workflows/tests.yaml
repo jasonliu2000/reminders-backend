@@ -1,0 +1,30 @@
+name: Reminder Tests
+
+on:
+  push:
+    branches: ["master"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3.3'
+          coverage: xdebug
+
+      - name: Copy Files
+        run: cp laravel-starter/source/.env.example .env && cp laravel-starter/source/artisan artisan
+      
+      - name: Install Dependencies
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist --working-dir=laravel-starter/source
+      
+      - name: Run Tests
+        run: php artisan test
