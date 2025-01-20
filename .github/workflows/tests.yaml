@@ -30,4 +30,4 @@ jobs:
         run: ls
       
       - name: Run Tests
-        run: php artisan test
+        run: cd laravel-starter/source && php artisan test
