@@ -28,9 +28,6 @@ jobs:
 
       - name: Create SQLite database file
         run: touch laravel-starter/source/database/database.sqlite
-
-      - name: ls
-        run: ls laravel-starter/source/database
       
       - name: Run Tests
         run: cd laravel-starter/source && php artisan test
