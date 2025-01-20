@@ -208,6 +208,7 @@ class ReminderController extends Controller
      * 
      * @param int $status - the HTTP status code
      * @param string $message - the error message
+     * @return JsonResponse
      */
     function errorResponse(int $status, string $message): JsonResponse
     {

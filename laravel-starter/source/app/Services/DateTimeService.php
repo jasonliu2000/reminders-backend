@@ -8,6 +8,7 @@ class DateTimeService
 {
     /**
      * Get date format string that should be used to validate all date inputs
+     * @return string
      */
     public static function getDateFormat(): string
     {
@@ -19,6 +20,7 @@ class DateTimeService
      * Transform date string into RFC3339 format
      * 
      * @param string $datetime - the datetime string in basic ISO 8601 format (ex. 20250101T000000Z)
+     * @return string
      */
     public static function transformIntoRFC3339(string $datetime): string
     {
