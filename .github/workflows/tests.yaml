@@ -27,7 +27,7 @@ jobs:
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist --working-dir=laravel-starter/source
 
       - name: ls
-        run: ls
+        run: ls laravel-starter/source/database
       
       - name: Run Tests
         run: cd laravel-starter/source && php artisan test
